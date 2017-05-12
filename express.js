@@ -6,7 +6,7 @@ var compression = require( 'compression' )
 var cors        = require( 'cors' )
 var opn         = require( 'opn' )
 var REST        = require( './REST/rest.middleware.js' )
-var config      = require( './server.config.json' )
+var config      = require( '/etc/server/server.config.json' )
 
 
 var app = express()
