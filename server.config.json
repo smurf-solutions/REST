@@ -1,6 +1,6 @@
 {
 	"port"     : 8000,
-	"folder"   : "public",
+	"folder"   : "html",
 	"dbPrefix" : "collections",
 	"dbUrl"    : "mongodb://127.0.0.1:27017/<DATABASE>",
 	"https"    : "ssl/localhost",
