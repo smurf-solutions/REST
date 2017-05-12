@@ -16,17 +16,22 @@ app.use( function( req,res,next ) { req.dbPrefix = config.dbPrefix; next() })
 app.use( compression() )
 app.use( cors() )
 app.use( REST )
-app.use( express.static( config.folder ) )
+app.use( express.static( config.static_folder ) )
 
 
-var url = (config.https?'https://':'http://')+'localhost:'+config.port
+var url = (config.certificate?'https://':'http://')+'localhost:'+config.port
 
-if( !config.https ) {
+function log( msg ) {
+	fs.writeFile( "/var/log/RESTserver.log", JSON.stringify( msg, null, 4 ), function( err ){} )
+	console.log( msg )
+}
+
+if( !config.certificate ) {
 	var httpServer = http.createServer( app )
-	httpServer.listen( config.port, function(){ console.log( config ); if(config.browser) opn(url,{ app:config.browser}) } )
+	httpServer.listen( config.port, function(){ log( config ); if(config.browser) opn(url,{ app:config.browser}) } )
 } else {
-	var privateKey  = fs.readFileSync( config.https+'.key', 'utf8')
-	var certificate = fs.readFileSync( config.https+'.cert', 'utf8')
+	var privateKey  = fs.readFileSync( "/etc/ssl/private/"+config.certificate+'.key', 'utf8')
+	var certificate = fs.readFileSync( "/etc/ssl/certs/"+config.certificate+'.cert', 'utf8')
 	var httpsServer = https.createServer( { key: privateKey, cert: certificate }, app )
-	httpsServer.listen( config.port, function(){ console.log( config ); if(config.browser) opn(url,{ app:config.browser}) } )
+	httpsServer.listen( config.port, function(){ log( config ); if(config.browser) opn(url,{ app:config.browser}) } )
 }
