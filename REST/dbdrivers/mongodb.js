@@ -51,7 +51,7 @@ function authenticate( access, dbInfo, callback1, callback2 ) {
 }*/
 function findOne( dbInfo, filter, fields, callback ) {
 	mongodb.MongoClient.connect( dbInfo.dbUrl, function(err, db) {
-		if(err) callback( { error: err.errmsg } )
+		if(err) callback( { error: 'MongoError' } )
 		else authenticate( 'read', Object.assign(dbInfo,{db:db}), callback, function( callback ) {
 			db.collection( dbInfo.collection )
 			  .findOne( sanitize( filter ), (typeof fields=='string'?{_id:0}:fields), function( err, document ){
@@ -63,7 +63,7 @@ function findOne( dbInfo, filter, fields, callback ) {
 }
 function find( dbInfo, filter, fields, opts, callback ) {
 	mongodb.MongoClient.connect( dbInfo.dbUrl, function(err, db) {
-		if(err) callback( { error: err.errmsg } )
+		if(err) callback( { error: 'MongoError' } )
 		else authenticate( 'read', Object.assign(dbInfo,{db:db}), callback, function( callback ) {
 					let cursor = db.collection( dbInfo.collection ).find( sanitize( filter ), fields, opts )
 					cursor.count( function(err,count){
@@ -76,7 +76,7 @@ function find( dbInfo, filter, fields, opts, callback ) {
 }
 function save( dbInfo, data, opts, callback ) {
 	mongodb.MongoClient.connect( dbInfo.dbUrl, function(err,db) {
-		if(err) callback({ error: err.errmsg })
+		if(err) callback({ error: 'MongoError' })
 		else authenticate( 'write', Object.assign(dbInfo,{db:db}), callback, function( callback ) {
 				if( typeof data._id !== 'undefined' 
 					&& ( data._id == 0 || data._id === false || data._id === null) ) {
@@ -98,7 +98,7 @@ function save( dbInfo, data, opts, callback ) {
 }
 function update( dbInfo, filter, data, opts, callback ) { 
 	mongodb.MongoClient.connect( dbInfo.dbUrl, function(err, db) {
-		if(err) callback( { error: err.errmsg } )
+		if(err) callback( { error: 'MongoError' } )
 		else authenticate( 'write', Object.assign(dbInfo,{db:db}), callback, function( callback ) {
 					if( data._id && data._id == 0 ) delete data._id
 					db.collection( dbInfo.collection || '*' ).update( sanitize(filter), data, opts, function(err,res){
@@ -111,7 +111,7 @@ function update( dbInfo, filter, data, opts, callback ) {
 }
 function insert( dbInfo, data, callback ) {
 	mongodb.MongoClient.connect( dbInfo.dbUrl, function( err, db ) {
-		if( err ) callback( { error: err.errmsg } )
+		if( err ) callback( { error: 'MongoError' } )
 		else authenticate( 'write', Object.assign(dbInfo,{db:db}), callback, function( callback ) {
 					db.collection( dbInfo.collection )
 					   .insert( data, function( err, res ){
@@ -134,7 +134,7 @@ function remove( dbInfo, filter, callback ) {
 						//db.close()
 					})
 				})
-		else callback( { error: err.errmsg } )
+		else callback( { error: 'MongoError' } )
 	})
 }
 
