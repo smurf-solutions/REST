@@ -1,0 +1,77 @@
+﻿/*********************/
+/** REST Middleware **/
+/*********************/
+
+Възможности
+===============
+SSL
+Basic Authentication
+DB Users (and Roles)
+System Password
+
+
+
+КАК СЕ ИЗПОЛЗВА
+===============
+Кратко:
+-------
+Find: GET https://host:port/prefix/dbname/collection [?_id=ID] 
+Save: POST https://host:port/prefix/dbname/collection [?_id=ID]  + POST DATA или { $set:{ POST DATA } }
+Del.: DELETE https://host:port/prefix/dbname/collection ? _id=ID
+
+Подробно:
+--------
+https://mongodb.github.io/node-mongodb-native/markdown-docs/queries.html
+- findOne &fields // без опции
+- find $options &fields
+- save
+- update
+- insert
+- delte
+
+Интерфейс:
+	Приема GET, POST и DELETE заявки, които покриват четирите основни функционалност: четене, вмъкване, редакция и изтриване.
+	KRITERIA е json формат - дефиниран в правилата на MongoDB за търсене
+	DATA е json формат - съдържащ данни за запис/вмъкване
+	
+	GET - с get заявка може да се направи всичко:
+		Четене на всичко:
+		GET https://host:port/prefix/dbname/collection
+		
+		Четене по критерии:
+		GET https://host:port/prefix/dbname/collection?find=KRITERIA [&options={limit:N,skip:N,sort:F}] [&fields={f1:true, f2:true}]
+		GET https://host:port/prefix/dbname/collection?findOne=KRITERIA
+		
+		Вмъкване:
+		GET https://host:port/prefix/dbname/collection?save=DATA  // погледни правилата на MongoDb
+		GET https://host:port/prefix/dbname/collection?insert=DATA
+		
+		Редакция:
+		GET https://host:port/prefix/dbname/collection?save=DATA  // погледни правилата на MongoDb
+		GET https://host:port/prefix/dbname/collection?update=KRITERIA&data=DATA
+
+		Изтриване:
+		GET https://host:port/prefix/dbname/collection?delet=KRITERIA
+		
+	POST - служи за вмъкване и редактиране на колекции
+		АУТО:
+		POST https://host:port/prefix/dbname/collection
+			+ POST DATA ( Ако DATA съдържа ключ "_id" или "_id=0" извършва се вмъкване )
+	
+		Вмъкване:
+		POST https://host:port/prefix/dbname/collection?insert
+			+ POST DATA
+			
+		Редактиране:
+		POST https://host:port/prefix/dbname/collection?update=KRITERIA
+			+ POST DATA
+		
+	DELETE - е само за изтриване 
+		Изтриване: 
+		DELETE https://host:port/prefix/dbname/collection?find=KRITERIA
+		DELETE https://host:port/prefix/dbname/collection?delte=KRITERIA
+		DELETE https://host:port/prefix/dbname/collection?remove=KRITERIA
+
+	ВРЪЩА - json format:
+		{ error: ERR_DESCRIPTION }
+		{ success: NUMBER_RECORDS, [ insertedIds: ARRAY_OF_INSERTED_IDS ] }

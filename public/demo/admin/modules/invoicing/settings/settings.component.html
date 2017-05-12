@@ -1,0 +1,39 @@
+<md-toolbar>
+	<span fxFlex>Настройки за фактуриране</span>
+	<button md-icon-button routerLink="/Invoicing/"><md-icon>cancel</md-icon></button>
+</md-toolbar>
+
+<div class="padding">
+
+	<table class="data" style="max-width: 600px;">
+		<caption>
+			<h2 style="text-align:left">Статуси</h2>
+		</caption>
+		<thead><tr>
+			<th width="1em" align="center">Id</th>
+			<th width="1em" align="center">Икона</th>
+			<th align="left">Име</th>
+			<th width="1em">Затворен</th>
+			<th width="1em" align="center">Email</th>
+			<th width="1em"></th>
+		</tr></thead>
+		<tbody><tr *ngFor="let status of statuses">
+			<td align="center">{{ status.id }}</td>
+			<td align="center"> <md-icon>{{ status.icon }}</md-icon> </td>
+			<td>{{ status.name }}</td>
+			<td align="center"><md-icon *ngIf="status.closed">check</md-icon></td>
+			<td *ngIf="status.email"><md-icon>email</md-icon></td>
+			<td></td>
+		</tr></tbody>
+		<tfoot><tr>
+			<td><button md-mini-fab color="primary" title="Добави" style="margin-right:0.5em"> <md-icon>add</md-icon> </button></td>
+			<td><md-input placeholder="Icon" style="width:100px; margin-right:1em"></md-input></td>
+			<td><md-input placeholder="Name" style="width:100%"></md-input></td>
+			<td align="center"><md-checkbox></md-checkbox></td>
+			<td align="center"><md-checkbox></md-checkbox></td>
+			<td></td>
+		</tr></tfoot>
+	</table>
+	
+	
+</div>

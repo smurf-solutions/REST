@@ -1,0 +1,88 @@
+<table class="address section">
+    <thead><tr>
+        <th class="left">Получател</th> <td class="title-invoice"> ФАКТУРА </td> <th class="right">Доставчик</th>
+    </tr></thead>
+    <tbody><tr>
+        <td class="left"><table>
+            <tr><th>Фирма:</th><td>{{ customer.company.name }}</td></tr>
+            <tr><th>ЕИН:</th><td>{{ customer.company.uic }}</td></tr>
+            <tr><th>Адрес:</th>
+                <td>{{ customer.address.country }},
+                    {{ customer.address.city }},
+                    {{ customer.address.locale }}
+                </td></tr>
+            <tr><th>МОЛ:</th><td>{{ customer.company.mrp }}</td></tr>
+        </table></td>
+        <td class="middle"><table>
+            <tr><th style="font-size:1.1em">{{ subtitle | uppercase }}</th></tr>
+            <tr><th> <img style="height:30px;" src="//api-bwipjs.rhcloud.com/?bcid=code128&amp;text={{ invoice.number }}&amp;scaleY=1"> </th></tr>
+            <tr><th style="font-size:1.1em">№ {{ invoice.number }}</th></tr>
+            <tr><th>{{ invoice.date | date : "dd.MM.yyyy" }}</th></tr>
+        </table></td>
+        <td class="right"><table>
+            <tr><th>Фирма:</th><td>{{ company.name }}</td></tr>
+            <tr><th>ЕИН:</th><td>{{ company.uic }}</td></tr>
+            <tr><th>Адрес:</th>
+                <td>{{ company.address.country }},
+                    {{ company.address.city }},
+                    {{ company.address.locale }}
+                </td></tr>
+            <tr><th>МОЛ:</th><td>{{ company.mrp }}</td></tr>
+        </table></td>
+    </tr></tbody>
+</table>
+
+<br><br>
+
+<table class="items section">
+    <thead><tr>
+        <th>№</th>
+        <th align="left">Наименование</th>
+        <th align="right">Ед.Цена</th>
+        <th>М.Ед.</th>
+        <th>Кол.</th>
+        <th>Отстъпка</th>
+        <th align="right">Сума</th>
+    </tr></thead>
+    <tbody>
+        <tr *ngFor="let product of products; let i = index">
+            <td align="center"> {{ i+1 }} </td>
+            <td align="left">   {{ product.name }} {{ products.reference }} </td>
+            <td align="right">  {{ product.uprice | number : '.2-2' }} </td>
+            <td align="center"> {{ product.unit }} </td>
+            <td align="center"> {{ product.qty }} </td>
+            <td align="center"> {{ product.discount }} </td>
+            <th align="right">  {{ product.price | number : '.2-2' }}</th>
+        </tr>
+    </tbody>
+</table>
+<table class="sum section">
+    <tr><td width="100%">Сума без ДДС:</td>                    <td>{{ invoice.sum | number : '.2-2' }}</td></tr>
+    <tr *ngIf="invoice.discount > 0"><td width="100%">Отстъпка:</td> <td>{{ invoice.discount | number : '.2-2' }}</td></tr>
+    <tr><td width="100%">ДДС 20%:                              </td> <td>{{ invoice.vat | number : '.2-2'}}</td></tr>
+    <tr style="font-size:1.2em"><td width="100%">ТОТАЛ:        </td> <td>{{ invoice.total | number : '.2-2' }}</td></tr>
+</table>
+
+<div>{{ invoice.note }}</div>
+
+<div>Причина за неначисляване на ДДС:</div>
+
+<table class="payment section">
+    <tr><th>Начин на плащане:</th><th>{{ payment.title }}</th></tr>
+    <tr *ngFor="let data of payment.data"><td>{{ data.title }}</td><td>{{ data.value }}</td></tr>
+</table>
+
+<div style="font-weight:bold">Срок за плащане: {{ invoice.date_pay | date : "dd.MM.yyyy"  }}</div>
+<br><br>
+<table class="sign sectioin">
+    <tr><td>Получател:</td>                                 <td align="right">Издадена от:</td></tr>
+    <tr><td></td>                                           <td align="right"><em>{{ company.signer }}</em></td></tr>
+    <tr><td>.........................................</td>  <td align="right">.........................................</td></tr>
+</table>
+
+
+<div><small>
+    Съгласно чл.7, ал.1 и чл.8 от Закона за счетоводството, чл. 114 от ЗДДС и чл.78 от ППЗДДС - печатът не е задължителен реквизит на фактурата.
+</small></div>
+
+

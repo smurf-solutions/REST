@@ -1,0 +1,23 @@
+<md-toolbar color="transparent">
+	<div fxFlex>
+		<button md-icon-button (click)="app.layout.leftbar.toggle()"><md-icon>menu</md-icon></button>
+		{{ 'Users' | translate }}
+	</div>
+	<button md-raised-button color="primary">{{ 'New'|translate }}</button>
+</md-toolbar>
+
+<div class="padding">
+	<md-card *ngFor="let user of users" style="margin-bottom: 1em; width: 400px;" background="dark">
+		<md-card-title> {{ user.user }} </md-card-title>
+		<md-card-content>
+			<pre>{{ user | json }}</pre>
+		<!--
+			<div>_id: {{ user._id }}</div>
+			<div>user: {{ user.user }}</div>
+			<div>pwd: {{ user.pwd }}</div>
+			<div>roles: <pre>{{ user.roles | json }}</pre></div>
+			<div>credentials: <pre>{{ user.credentials | json }}</pre></div>
+		-->
+		</md-card-content>
+	</md-card>
+</div>

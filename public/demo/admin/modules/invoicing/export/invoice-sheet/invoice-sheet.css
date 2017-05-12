@@ -1,0 +1,81 @@
+table { 
+    border-collapse: collapse; 
+    width:100%; 
+    padding: 1em;
+}
+
+
+/* Address block */
+
+.title-invoice {
+    font-size: 24px;
+    text-align:center;
+}
+
+.address.section th {
+    padding: 1px 8px;
+}
+
+.address.section thead th.left {
+    text-align:left;
+    vertical-align: bottom;
+}
+.address.section thead th.right {
+    text-align: right;
+    vertical-align: bottom;
+}
+
+.address.section .left table,
+.address.section .right table
+{
+    border: 1px solid #aaa;
+}
+.address.section .left,
+.address.section .right
+{
+    width:40%;
+}
+.address.section .middle {
+    width: 20%;
+}
+
+.address.section tbody .left th, 
+.address.section tbody .right th 
+{
+    text-align: left;
+}
+
+
+/* Items block */
+
+.items.section {
+    border: 1px solid #aaa;
+}
+.items.section thead th {
+    /* background: rgba(0,0,0,0.05); */
+    border-bottom: 1px solid #aaa;
+}
+
+
+/* Sum section */
+
+.sum.section td {
+    text-align: right;
+    font-size: 1em;
+    padding-left: 1em;
+    font-weight: bold;
+}
+
+
+/* Payment block */
+
+.payment.section { 
+    border: 1px solid #aaa;
+}
+
+.payment.section th,
+.payment.section td
+{
+    padding: 0px 10px;
+    text-align:left;
+}
