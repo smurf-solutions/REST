@@ -1,8 +1,8 @@
 {
-	"port"     : 8000,
-	"folder"   : "html",
-	"dbPrefix" : "collections",
-	"dbUrl"    : "mongodb://127.0.0.1:27017/<DATABASE>",
-	"https"    : "ssl/localhost",
-	"browser"  : false
+	"port"          : 8000,
+	"static_folder" : "html",
+	"dbPrefix"      : "collections",
+	"dbUrl"         : "mongodb://127.0.0.1:27017/<DATABASE>",
+	"certificate"   : "ssl/localhost",
+	"browser"       : false
 }
