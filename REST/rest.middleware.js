@@ -3,7 +3,7 @@
 //var dbDriver = require( './dbdrivers/jsonfiles.js' )
 var dbDriver = require( './dbdrivers/mongodb.js' )
 
-var parser = require("./parser.js")
+var parser = require("./../lib/parser.js")
 
 function send( res, ret, contentType ) {
 	if( ret && ret.access == 'DENIDED' ) {

@@ -2,7 +2,8 @@
 //let dbUrl = 'mongodb://127.0.0.1:27017/'
 
 let mongodb = require('mongodb')
-let flatten = require('./../flatten').flatten
+let flatten = require('./../../lib/flatten').flatten
+let sysadmin = require("/etc/rest/admin.config.json")
 
 function sanitize( obj ) {
 	if( typeof obj !== 'object' ) return {}
@@ -13,12 +14,15 @@ function sanitize( obj ) {
 	}
 	return obj
 }
+/*
+Две таблици: users и users.roles
+	users: описва кои роли има потребителя
+	users.roles: описва на кои таблици какъв достъп имат ролите
+*/
 function authenticate( access, dbInfo, callback1, callback2 ) {
-	//callback2( callback1 ) ; return
 	if( dbInfo.collection !== 'system' ) {
-		if( dbInfo.user === require("./../sysadmin.js").name 
-			//&& dbInfo.collection === 'users' 
-			&& dbInfo.pass === require("./../sysadmin.js").md5key ) {
+		if( dbInfo.user === sysadmin.name 
+			&& dbInfo.pass === sysadmin.md5key ) {
 			callback2( callback1 )
 		}else{
 			dbInfo.db.collection( 'users' ).findOne({_id:dbInfo.user,pwd:dbInfo.pass},{roles:true},function( err,user ){
@@ -127,17 +131,35 @@ function insert( dbInfo, data, callback ) {
 }
 function remove( dbInfo, filter, callback ) {
 	mongodb.MongoClient.connect( dbInfo.dbUrl, function(err, db) {
-		if(!err) authenticate( 'write', Object.assign(dbInfo,{db:db}), callback, function( callback ) {
+		if( err ) callback( { error: 'MongoError' } )
+		else authenticate( 'write', Object.assign(dbInfo,{db:db}), callback, function( callback ) {
 					db.collection( dbInfo.collection || '*' ).remove( sanitize(filter), function(err,res){
 						if( err ) callback( { error: err.errmsg } )
 						else callback( { success: res.result.n } )
 						//db.close()
 					})
 				})
-		else callback( { error: 'MongoError' } )
 	})
 }
 
+
+/*
+type: databse, collection
+action: list, rename, copy, drop
+listDatabases, 
+-------------------------
+*/
+function admin( adminFunction, dbInfo, filter, callback ) {
+	mongodb.MongoClient.connect( dbInfo.dbUrl, function( err, db ) {
+		if( err ) callback( { error: 'MongoError' } )
+		else authenticate( 'write', Object.assign(dbInfo,{db:db}), callback, function( callback ) {
+			db = db.admin()[adminFunction]( function( err, ret ) {
+					if( err ) callback( { error: err.msg } )
+					else callback( { count: ret.length, data: ret } );
+				})
+			})
+	})	
+}
 
 
 exports.find    = find
@@ -147,4 +169,5 @@ exports.save    = save
 exports.update  = update
 exports.insert  = insert
 exports.remove  = remove
+exports.admin   = admin
 

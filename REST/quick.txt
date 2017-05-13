@@ -1,0 +1,21 @@
+﻿Quick reference
+
+
+{FILTER}={key:value...}
+{DATA}={key:value...}
+
+
+save={_id:"..."}&data={DATA}
+ - Прави цял запис. ( Ако го има променя стария, ако го няма прави нов. !променя всички полета, като изтрива несъществуващите )
+
+update={FILTER}&data={DATA}
+ - Променя целия запис
+update={FILTER}&data={$set:{DATA}}
+ - Променя само {DATA} полетата
+
+insert={DATA}
+ - Прави нов запис
+ 
+delete={FILTER}
+remove={FILTER}
+ - Изтрива
