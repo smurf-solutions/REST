@@ -75,7 +75,7 @@ displayLoginPage = function( req, res, next ){
 	fs.readFile( file, function( err, data ){
 		if( err ) next()
 		else { 
-			data = data.toString().replace( /admin/g, req.params.database )//|| "SMURF Ltd" )
+			data = data.toString().replace( /SMURF Ltd/g, req.params.database )
 			res.setHeader('Content-type', 'text/html' );
 			res.end(data);
 		}
