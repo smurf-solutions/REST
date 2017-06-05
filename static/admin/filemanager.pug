@@ -1,0 +1,27 @@
+DOCTYPE html
+html
+head
+	title File Manager
+	link (rel="stylesheet" href="style.css" )
+body
+	h1 File Manager
+	div( style="text-align:center; padding:10px; background: #eee" )
+		Datbase: 
+		select ( id="select-db" style="width:200px" onchange="dbs.select(this.value)" )
+	br
+	div
+		div( id="tree" style="width:250px; float:left" )
+			header 
+				button-icon Refr
+			div
+		div( id="files" style="margin-left: 250px" )
+			header: h1 Files
+			div
+	
+	br( style="clear:both" ): br
+	
+	footer: span (style="float:left") Smurf &copy; 2017
+	
+	progress( style="width:100%; height:4px; position: fixed; top:0%" hidden )
+	script ( src="functions.js" )
+	script ( src="filemanager.js" )

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Db Manager</title>
+	<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+	<h1><!--&#9783;--> Db Manager</h1>
+ 
+	<menu id="main-menu" style="background:rgba(0,0,0,0.05);padding:10px; line-height:24px">
+		<button onclick="routeTo()"> Home </button>
+		<button id="new-doc" onclick="routeTo(':newDocument')"> New doc </button>
+		<span style="float:right">
+			<i style="color:#bbb">Tools:</i> 
+			<button-icon onclick="document.querySelector('#dialog-md5-convertor').style.display='block'">Md5</button-icon>
+			<button-icon onclick="app.openTerminal(true)">Query</button-icon>
+		</span>
+	</menu>
+	
+	
+	<!-- Databases -->
+	
+	<section id="databases-section">
+		<table id="databases-table" class="view"  width="100%" hidden>
+			<caption>
+				<big>Databases</big>
+				<div style="float:left"> Found: <b name="docs"></b> </div>
+			</caption>
+			<thead><tr> <th></th>  <th>Name</th> <th>sizeOnDisk</th> <th>empty</th> <th></th>  </tr></thead>
+			<tbody> </tbody>
+			<tfoot><tr> <td></td> <td></td> <th name="sum-size" align="right">0000</th> <td></td> </tr></tfoot>
+		</table>
+		<template id="databases-template" hidden>
+		<tr>
+			<th width="1px"> <button-icon>&xrArr;</button-icon> </th>
+			<td>name</td> <td align="right">size</td> <td>empty</td>
+			<th width="1px"> <button-icon>&times;</button-icon> </th>
+		</tr>
+	</template>
+	</section>
+	
+	
+	<!-- Collections -->
+	
+	<table id="collections-table" class="view" width="100%" hidden>
+		<caption>
+			<div style="float:left"> Found: <b name="docs"></b> </div>
+			Collections on <big name="title"></big>
+		</caption>
+		<thead><tr> <th width="1px"><button-icon onclick="javascript:routeTo()">&lArr;</button-icon></th> 
+					<th>Name</th> <th>Type</th> <th>Options</th> <th>Info</th> <th>idIndex</th> <th></th> </tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+	<template id="collections-template" hidden>
+		<tr>
+			<th width="1px"> <button-icon>&xrArr;</button-icon> </th>
+			<td>name</td> <td>type</td> <td>options</td> <td>info</td> <td>idIndex</td> <th> <button-icon> &times; </button-icon></th>
+		</tr>
+	</template>
+	
+	
+	<!-- Documents -->
+	
+	<table id="documents-table" class="view" style="min-width:600px" hidden>
+		<caption style="text-align: left">
+			<div style="float:left"> 
+				Displayed: <b name="docs"></b> of <b name="all-docs"></b> / 
+				Page: <select name="page" onchange="DocumentsComponent.gotoPage( this.value )"></select> of <b name="all-pages"></b> 
+			</div>
+			<span style="margin-left: 100px"> Collections in <big class="title"></big> </span>
+			<div style="float:right"> Per page: <b name="per-page"></b></div>
+		</caption>
+		<thead><tr>
+			<th width="1px"> <button-icon name="back" onclick="routeBack()" data-title="Back">&lArr;</button-icon> </th>
+			<td><button-icon onclick="DocumentsComponent.display()" data-title="Reload">&#10227;</button-icon></td>
+		</tr></thead>
+		<tbody></tbody>
+	</table>
+
+	<dialog id="dialog-edit-document" class="view" hidden style="width:610px; height:440px" onkeyup="if(event.key.substr(0,3)=='Esc') closeDialog()" >
+		<header>
+			<button-icon onclick="closeDialog()" style="float:right">&#10006;</button-icon>
+			<big name="title">Dialog Title</big>
+		</header>
+		<div id="form-edit-document">
+			<section> <label>Databse:</label>     <div> <input name="database" autofocus>     </div></section>
+			<section> <label>Collection:</label>  <div> <input name="collection">             </div></section>
+			<section> <label>Content:</label>     <div> <textarea name="data" rows="10"></textarea>  </div></section>
+			<footer> 
+				<button name="save" onclick="DocumentComponent.save( routeBack );">Save</button> 
+				<button name="delete" onclick="DocumentComponent.remove( routeBack );">Delete</button>
+			</footer>
+		</div>
+	</dialog>	
+	
+	
+	<!-- Tools -->
+	<dialog id="tools-terminal" hidden onkeyup="if(event.key.substr(0,3)=='Esc') app.openTerminal(false)">
+		<header><i>Tools:</i> <b>DB Query</b> <button-icon onclick="app.openTerminal(false)" style="float:right">&times;</button-icon></header>
+		<form>
+			<section>
+				<div style="float:left; width:100px"> 
+					<label>Method:</label> <select name="method" style="height:25px"> <option>GET</option> <option>POST</option> <option>PUT</option> <option>PATCH</option> <option>DELETE</option> </select> 
+				</div>
+				<div style="float:left; width: calc(100% - 105px); margin-left:5px">
+					<label>Path:</label> <input name="path" style="height:25px;">
+				</div>
+			</section>
+			<br style="clear:both">
+			<section><label>Url params:</label> <input name="params" placeholder="_id?fields={nam:1}"> </section>
+			<section><label>Body:</label> <textarea name="body" style="height:100px"></textarea> </section>
+		</form>
+		<footer><button onclick="app.onExecuteTerminalCommand()">Execute</button></footer>
+	</dialog>
+	
+	<dialog id="dialog-md5-convertor" hidden onkeyup="if(event.key.substr(0,3)=='Esc') document.querySelector('#dialog-md5-convertor').style.display='none'">
+		<header>Tools: <b>Md5 Convertor</b> <button-icon onclick="document.querySelector('#dialog-md5-convertor').style.display='none'" style="float:right">&times;</button-icon></header>
+		<section><input type="search" id="md5-convertor" placeholder="..."></section>
+		<footer><button onclick="var e = document.querySelector('#md5-convertor'); e.value=md5(e.value)">Convert</button></footer>
+	</dialog>
+	
+	<br><br>
+	<footer> <span style="float:left">Smurf &copy; 2017</span> </footer>
+	
+
+	<link rel="stylesheet" href="app-menu.css">
+	<script src="app-menu.js"></script>
+	
+	<progress style="width:100%; height:4px; position: fixed; top:0%" hidden></progress>
+	<script src="functions.js"></script>
+	<script src="dbmanager.js"></script>
+	<script src="md5.min.js"></script>
+</body>
+</html>

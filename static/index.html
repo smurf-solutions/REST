@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<head>
+	<style>
+		a { padding: 10px 20px; 
+			background: navy; 
+			border-radius: 25px; 
+			color:#fff;
+			text-decoration: none;
+			font-weight:bold;
+		}
+		.logo { 
+			text-transform: uppercase;
+			font-size: 58px; 
+		}
+	</style>
+</head>
+<body style="text-align:center">
+	
+	<div class="logo">admin</div>
+	<div style="color:#aaa" id="datetime"></div>
+	<br>
+	<!--
+	<a href="https://localhost:8000/admin/login">ENTER</a>
+	<br><br><br><br>
+	-->
+	<footer>2017 &copy; SMURF Ltd</footer>
+	<script>
+		document.body.querySelector( "#datetime" ).textContent = (new Date()).toGMTString();
+		(function(safeLocation){
+			try { var outcome = document.execCommand("ClearAuthenticationCache") }catch(e){}
+			if (!outcome) outcome = (function(x){
+					if (x) { x.open("HEAD", safeLocation || location.href.replace(/\/$/,"")+"/logout", true, "logout", (new Date()).getTime().toString())
+							 x.send(""); return 1 
+					} else return
+				})(window.XMLHttpRequest ? new window.XMLHttpRequest() : ( window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : false ))
+			if (!outcome) alert("Your browser is too old or too weird to support log out functionality. \n\nCLOSE ALL WIDOWS AND RESTART THE BEOWSER !")
+		})("/logout/logout")
+	</script>
+</body> 

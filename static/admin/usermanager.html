@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Users Manager</title>
+	<link rel="stylesheet" href="style.css" />
+	<style>
+		.layout { width: 100%; claer:both}
+		.layout > div { float:left; width:50%; box-sizing: border-box; margin:0 } 
+		.layout > section  { float: left; width:50%; padding-left:20px; box-sizing: border-box; margin:0 }
+		
+		tr.selected td { background: #f0f0f0 }
+	</style>
+</head>
+<body>
+	<h1><!--&#9787; -->Users Manager</h1>
+
+	<section id="database-select" style="text-align: center; padding:10px; background:rgba(0,0,0,0.05)">
+		<b>Select databse</b>: <select name="database" onchange="app.route(this.value)" style="width:400px" autofocus></select>
+	</section>
+	<br>
+	<!-- <hr><br> -->
+	
+	<div class="view nodata" style="text-align:center">
+		<p>No database is selected</p>
+		<!--
+		<div style="position1:absolute; bottom:10px">
+			<input type="search" id="md5-convertor" placeholder="Md5 convertor" style="width:250px"> 
+			<button-icon onclick="var e = document.querySelector('#md5-convertor'); e.value=md5(e.value)">Go</button-icon>
+		</div>
+		-->
+	</div>
+
+<!-- List USERS -->
+	
+	<section id="users-section" class="view layout" hidden>
+		<div>
+			<div><button onclick="usersComponent.edit('')">Add User</button> <button-icon onclick="usersComponent.reload()" data-title="Reload">&#10227;</button-icon></div>
+			<table name="users-list" style="width:100%">
+				<caption>Users list</caption>
+				<thead><tr><th>Login</th> <th>Full name</th> <th>Email</th> <th>Roles</th> <th colspan="3"></th> </tr></thead>
+				<tbody></tbody>
+			</table>
+			<template data-user-row hidden>
+				<tr>
+					<td style="cursor:pointer;white-space:nowrap">[ <b name="_id"> id </b> ]</td> 
+					<td name="name"  style="cusror:pointer"> name </td>
+					<td name="email" style="cursor:pointer"> email </td>
+					<td name="roles" style="cursor:pointer">roles</td>
+					<td width="1em"> <button-icon name="pwd" data-title="Set password">**</button-icon></td>
+					<td width="1em"> <button-icon name="edit" data-title="Edit">&#x270E;</button-icon></td>
+					<td width="1em"> <button-icon name="remove" data-title="Remove">&times;</button-icon></td> 
+				</tr>
+			</template>
+		</div>
+		<dialog id="dialog-edit-user" hidden style="width:500px;height:290px" onkeyup="if(event.code=='Escape'||event.code=='Esc') dialogEditUser.close()">
+			<header> <span class="title"> Edit User </span> <button-icon onclick="dialogEditUser.close()" style="float:right">&times;</button-icon> </header>
+			<form>
+				<section><label>Id:</label>   <input name="_id" autofocus></section>
+				<section><label>Name:</label> <input name="name"></section>
+				<section><label>Email:</label> <input name="email"></section>
+			</form>
+			<footer>
+				<button onclick="dialogEditUser.save()">Save</button>
+			</footer>
+		</dialog>
+		
+<!-- ROLES -->
+		
+		<section id="user-roles" class="view">
+			<div><button onclick="dialogRole.displayNew()">Add Role</button>
+				<button-icon onclick="usersComponent.roles.reload()" data-title="Reload">&#10227;</button-icon>
+			</div>
+			<form>
+				<table id="list-roles" width="100%">
+					<caption> Roles </caption>
+					<thead><tr> <th>Role name</th><th>Read collections</th><th>Write collections</th> <th colspan="2"></th> </tr></thead>
+					<tbody name="content"> </tbody>
+				</table>
+			</form>
+			<template data-roles-template>
+				<tr>
+					<td><label style="cursor:pointer;white-space:nowrap" data-title="Add / remove role">
+							<input type="checkbox" name="role" value="" onclick="usersComponent.roles.updateUserRoles()"> 
+							&nbsp; <span name="role-name">roleName</span> 
+					</label></td>
+					<td name="read">read</td>
+					<td name="write">write</td>
+					<td width="1em"> <button-icon name="edit" data-title="Edit">&#x270E;</button-icon></td>
+					<td width="1em"> <button-icon name="remove" data-title="Remove">&times;</button-icon></td> 
+				</tr>
+			</template>
+			
+			<dialog id="dialog-role" hidden onkeyup="dialogRole.keyboard( event )" style="width:600px">
+				<header> <span name="title">Edit Role</span> <button-icon onclick="dialogRole.close()" style="float:right">&times;</button-icon></header>
+				<form style="overflow-y:auto">
+					
+					<section><label>Name:</label> <input name="_id" autofocus required> <sup>Do NOT use dots !</sup></section>
+					
+					<section>
+						<div style="float:left;width:50%"><b>Read:</b><div name="read-wrap"></div> </div>
+						<div style="float:left;width:50%"><b>Write:</b> <div name="write-wrap"></div> </div>
+					</section>
+				</form>
+				<br style="clear:both">
+				<footer>
+					<button onclick="dialogRole.save()">Save</button>
+				</footer>
+			</dialog>
+			<template id="template-role-row">
+				<div style="white-space:nowrap">
+					<label>
+						<input type="checkbox" name="roles" style="width:auto" value="">
+						<span name="label">role._id</span>
+					</label>
+				</div>
+			</template>
+			
+		</section>
+	</section>
+	
+	<br style="clear:both"><br> <!--<hr><br>-->
+	
+<!-- List Collections -- >
+	
+	<section id="collections-section" class="view" hidden>
+		<table  style="min-width:400px">
+			<thead><tr><th>Collections</th></tr></thead>
+			<tbody></tbody>
+		</table>
+	</section>
+<!-- -->	
+	
+	<link rel="stylesheet" href="app-menu.css">
+	<script src="app-menu.js"></script>
+	
+	<footer> <span style="float:left">Smurf &copy; 2017</span> </footer>
+	<progress style="width:100%; height:4px; position: fixed; top:0%" hidden></progress>
+	<script src="functions.js"></script>
+	<script src="usermanager.js"></script>
+	<script src="md5.min.js"></script>
+	
+</body>
+</html>

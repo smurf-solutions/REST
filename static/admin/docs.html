@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<title>Welcome</title>
+		<link rel="shortcut icon" type="image/png" href="favicon.ico" />
+	</head>
+	<body>
+		<pre>
+Smurf's DATABASE
+--------------------------
+
+Интерфейс: REST
+
+Драйвер: MongoDB
+
+Формат:  JSON
+
+Методи:
+	GET    - Връща намерените полета по критериий ФИЛТЪР + нформация за броя и страниците.
+	POST   - Замества ЦЕЛИЯ документ по критерий ФИЛТЪР. Връща брой засегнати зписи.
+	PUT    - Прави нов запис. Връща новото _id.
+	PATCH  - Редактира САМО съответните полета по критерий ФИЛТЪР. Връща брой засегнати записи.
+	DELETE - Изтрива запис по критерий ФИЛТЪР. Връща брой засегнати записи.
+
+URL:
+	ПЪТ (PATH):
+		/DbName/CollName/
+	ФИЛТЪР (filter):
+		Филтриране по ID: 
+			/:ПЪТ/:id
+		Филтриране по сложен критерий:
+			/:ПЪТ?filter={name:"^name$",email:"email@email.com"}
+	ОПЦИИ:
+		Страница 2 с 20 записа и подреждане по мейл възходящо
+			/:ПЪТ?:ФИЛТЪР &skip=40&limit=20&sort={mail:1}
+
+			
+Структури на Методите:
+
+	GET(1) = FIND_ALL
+		url:     /:PATH ? filter={BSON} & fields={BSON} & skip(page)=NUM & limit=NUM & sort={filed:-1}
+		body:    -
+		returns: { pages: NUM, founded: NUM, returned: NUM, data:[{JSON},{JSON}...]} <-> onError: {}
+		
+		!!! fields може да е или обект или стринг.
+		!!! sort   може да е или обект или стринг. Ако е стринг за посоката се взима предвид дали има минус (-) отпред
+		!!! skip е отместване на брой документи, а page номер на конкретна страница
+	
+	GET(2) = FIND_ONE
+		url:     /:PATH/id ? fields={field1:1,field2:0,field3:1,...} 
+		body:    -
+		returns: {field1:FIELD_CONTENT, field3:FIELD_CONTENT,...} <-> onError: {}
+		
+		!!! fields НЕ трябва да е стринг String
+		
+	GET(3) = GET_FILE
+		url:     /:PATH/:id ? [ver=field  (or fields=field)] & [ download ] 
+		body:    -
+		returns: FIELD_CONTENT <-> onerror: '404'
+		
+		!!! ver (или fields) трябва да е String иначе връща JSON
+		!!! download форсира свалянето на файла
+		
+
+	POST = UPDATE 
+		url:     /:PATH/:id ? upsert=0 
+		body:    [FormData]
+		returns: {success:NUM_CHANGED_RECORDS} <-> onError: {error:STRING, code:NUM}
+	PUT = INSERT  
+		url:     -
+		body:    [FormData]
+		returns: { success: NUMBER_RECORDS, insertedIds: ARRAY_OF_INSERTED_IDS } <-> onError: {error:STRING,code:11000}
+	PATCH = $SET -  partial modifications to a resource
+		url:     /:PATH ? filter={BSON} & multy=1
+		body:    [FormData]
+		returns: { success: NUM_CHANGED_RECORDS }  <-> onError: { error: STRING, code: NUM }
+	DELETE = REMOVE
+		url:     /:PATH/:id
+		body:    -
+		returns: {success:NUM_DELETED_RECORDS}
+		
+	
+Функции:
+	listDatabases
+	dropDatabase/:database
+	renameDatabase/:from_database-:to_database
+	dropCollection/:database/:collection
+	renameCollection/:database/:from_collection-:to_collection
+
+		
+		</pre>
+
+		<hr>
+		<footer style="text-align:center">
+			Links: &nbsp;| &nbsp; 
+			<a href="http://expressjs.com/en/guide/routing.html">Express Routing</a>
+			&nbsp; | &nbsp;
+			<a href="https://www.toptal.com/designers/htmlarrows/">HTML symbols</a>
+			&nbsp; | &nbsp;
+			<a href="https://www.w3schools.com/howto/">JS Tutorial</a>
+			&nbsp; |
+		</footer>
+		<link rel="stylesheet" href="app-menu.css">
+		<script src="app-menu.js"></script>
+	</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>File Manager</title>
+	<link rel="stylesheet" href="style.css" />
+	<style>
+		.hover-reversed { cursor: pointer; padding: 2px 5px }
+		.hover-reversed:hover { color:#fff; background: #333 }
+		.active { background: #ddd }
+	</style>
+</head>
+<body>
+	<h1>File Manager</h1>
+	<div class="layout">
+		
+		<!-- Collections -->
+		<section id="collections" style="float:left;width:200px">
+			<header>
+				<select class="dbs" style="width:calc(100% + 1px);border-bottom:0; box-sizing:border-box; font-weight:bold;" onchange="app.onDatabaseChanged( this.value )"></select>
+			</header>
+			<ul></ul>
+			<template >
+				<li class="hover-reversed" onclick="app.onCollectionChanged( this.getAttribute('data-value') )">
+					<span class="title"></span>
+				</li>
+			</template>
+		</section>
+		
+		
+		<!-- TREE -->
+		<section id="tree" style="float:left;width:350px">
+			<header style="margin:0;position:relative; top:-10px">
+				<select style="opacity:0;width:40px; box-sizing:border-box"></select>
+				<input style="opacity:0; width:calc(100% - 150px);box-sizing:border-box" type="search" placeholder="Search">
+				<button-icon  data-title="Filter" style="opacity:0;width:25px;box-sizing:border-box"><span style="transform: rotate(45deg);display:inline-block">&#9906;</span></button-icon>
+				<button-icon data-title="Reload" onclick="app.reloadTree()" style="width:25px">&#10227;</button-icon>
+				<button-icon data-title="Upload a file" style="width:25px" onclick="app.onUploadFile()">&#8683</button-icon>
+				<button-icon data-title="Add New File" onclick="app.onSaveNewFile()" style="width:25px;font-weight:bold">+</button-icon>
+			</header>
+			<ul style="border:1px solid #ccc; border-right-width:0; height: 400px; overflow-y:scroll; width:100%; box-sizing:border-box; margin:0;padding:0"></ul>
+			<template class="tree" hidden>
+				<li class="hover-reversed" onclick="app.onTreeSelectionChanged( this.getAttribute('data-path') )"></li>
+			</template>
+			<form id="upload-file-form" hidden>
+				<input type="file" multiple name="myFileUploader" onchange="app.onUploadFile( this.value )">
+			</form>
+		</section>
+		
+		
+		<!-- FILE -->
+		<section id="file">
+			<header> 
+				<label style="position:relative;top:5px;font-weight:bold"> No File </label> 
+				<span class="buttons" style="float:right;">  
+					<button name="save" onclick="app.onSaveFile()" hidden>Save</button> 
+					<button name="rename" hidden onclick="app.onRenameFile()">Rename</button> 
+					<button name="delete" hidden onclick="app.onDeleteFile()">Delete</button>
+					<button name="mime" hidden onclick="app.onChangeMime()" data-title="Change MimeType">Mime</button>
+				</span>
+			</header>
+			<div style="min-width:300px; height:400px; background-color:rgba(255,255,255,0.2);border:1px solid #ccc; margin-top:-1px">
+				<div id="file-editor" style="height:398px" hidden> Svetlio </div>
+				<img id="image-editor" style="max-width:400px;max-height:400px" src="" hidden>
+				<div id="info-editor" hidden> Info Editor </div>
+			</div>
+		</section>
+	</div>
+	
+	<footer> <span style="float:left">Smurf &copy; 2017</span> </footer>
+	
+	<link rel="stylesheet" href="app-menu.css">
+	<script src="app-menu.js"></script>
+	
+	<progress style="width:100%; height:4px; position: fixed; top:0%" hidden></progress>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js"></script>
+	<script src="functions.js"></script>
+	<script src="filemanager.js"></script>
+	
+</body>
+</html>
