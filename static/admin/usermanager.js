@@ -63,7 +63,7 @@ usersComponent = {
 		userData: "",
 		
 		getAllData: function( cb ) {  // rolse-list
-			ajax("GET", "/"+app.database+"/db.roles", function( data ) {
+			ajax("GET", "/"+app.database+"/db.roles?find={}", function( data ) {
 				usersComponent.roles.allData = data.data
 				cb()
 			})
@@ -147,7 +147,7 @@ usersComponent = {
 	},
 	
 	getData: function( cb ) {  //users-list
-		ajax( "GET", "/" + app.database + "/db.users?sort={_id:1}", function( data ){
+		ajax( "GET", "/" + app.database + "/db.users?find={}&sort={_id:1}", function( data ){
 			usersComponent.data = data.data
 			cb()
 		})

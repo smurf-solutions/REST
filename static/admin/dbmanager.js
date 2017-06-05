@@ -152,7 +152,7 @@ DocumentsComponent = {
 	sort     : {_id:1},
 	
 	getData: function( callback ) {
-		let url = DocumentsComponent.dataUrl + "?page=" + DocumentsComponent.page 
+		let url = DocumentsComponent.dataUrl + "?find={}&page=" + DocumentsComponent.page 
 				+ "&limit=" + DocumentsComponent.perPage + "&sort=" + JSON.stringify( DocumentsComponent.sort)
 		ajax( "GET", url, function ( ret ) {
 			DocumentsComponent.data = ret.data
