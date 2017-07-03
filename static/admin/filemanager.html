@@ -40,7 +40,7 @@
 				<button-icon data-title="Upload a file" style="width:25px" onclick="app.onUploadFile()">&#8683</button-icon>
 				<button-icon data-title="Add New File" onclick="app.onSaveNewFile()" style="width:25px;font-weight:bold">+</button-icon>
 			</header>
-			<ul style="border:1px solid #ccc; border-right-width:0; height: calc(100% - 36px); overflow-y:scroll; width:100%; box-sizing:border-box; margin:0;padding:0"></ul>
+			<ul style="border:1px solid #ccc; border-right-width:0; height: calc(100% - 46px); overflow-y:scroll; width:100%; box-sizing:border-box; margin:0;padding:0"></ul>
 			<template class="tree" hidden>
 				<li class="hover-reversed" onclick="app.onTreeSelectionChanged( this.getAttribute('data-path') )"></li>
 			</template>
@@ -61,8 +61,8 @@
 					<button name="mime" hidden onclick="app.onChangeMime()" data-title="Change MimeType">Mime</button>
 				</span>
 			</header>
-			<div style="min-width:300px; height:calc(100% - 36px); background-color:rgba(255,255,255,0.2);border:1px solid #ccc; margin-top:-1px">
-				<div id="file-editor" style="height:calc(100% - 38px);" hidden> Svetlio </div>
+			<div style="min-width:300px; height:calc(100% - 46px); background-color:rgba(255,255,255,0.2);border:1px solid #ccc; margin-top:-1px">
+				<div id="file-editor" style="height:calc(100% - 48px);" hidden> Svetlio </div>
 				<img id="image-editor" style="max-width:400px;max-height:500px" src="" hidden>
 				<div id="info-editor" hidden> Info Editor </div>
 			</div>
