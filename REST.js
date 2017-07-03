@@ -153,7 +153,14 @@ app.use( [ "/:database/:collection*", "/:database*", "*" ], function mdw_Authent
 					if( ret && ret._id ) next()
 					else refuseAccess( req, res, next )
 				})
-			} else refuseAccess( req, res, next )
+			} else {
+				let query = { _id:"*", [access]:{ $in:[ req.params.collection, "*" ] } }
+				req.mongodb.collection( 'db.roles' ).findOne( query, function _( err, ret ) {
+					if( ret && ret._id ) next()
+					else refuseAccess( req, res, next )
+				})
+				//refuseAccess( req, res, next )
+			}
 		})
 	}
 })
