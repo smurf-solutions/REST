@@ -65,12 +65,14 @@ let auth        = function( req ){
 					return user
 				}
 let refuseAccess = function( req, res, next ) {
+					if( req.mongodb ) req.mongodb.close()
 					res.statusCode = 401
 					res.setHeader( 'WWW-Authenticate', 'Basic realm="SMART MongoDb"')
 					displayLoginPage( req, res, next )
 				} 
 
 displayLoginPage = function( req, res, next ){
+	if( req.mongodb ) req.mongodb.close()
 	let file = root_dir + 'static/index.html'// + req.params.database
 	fs.readFile( file, function( err, data ){
 		if( err ) next()
@@ -136,6 +138,7 @@ app.use( [ "/:database/:collection*", "/:database*", "*" ], function mdw_Authent
 		refuseAccess( req, res, next ); return
 	} else { switch( req.method ) {
 					case "GET"    : var access = "read"; break
+					case "NOTIFY" : 
 					case "POST"   : 
 					case "PUT"    : 
 					case "PATCH"  : 
@@ -169,6 +172,7 @@ app.get( "/:database", function ( req, res, next ) {
 // 1. listDatabses
 app.all( "/admin/listDatabases", function adm_listDatabases( req, res, next ){
 	req.mongodb.admin().listDatabases( function _( err, dbs ){
+		req.mongodb.close()
 		res.end( JSON.stringify( dbs ) )
 	})
 })
@@ -176,25 +180,26 @@ app.all( "/admin/listDatabases", function adm_listDatabases( req, res, next ){
 app.all( "/admin/dropDatabase/:database", function adm_dropDatabase( req, res, next ) {
 	req.mongodb.dropDatabase( function _( err, ret ){
 		if( err ) res.end( JSON.stringify( {error:err.message} ) ) 
-		else res.end( '{success:1}' )
+		else { req.mongodb.close(); res.end( '{success:1}' ) }
 	})
 } )
 // 3. renameDatabase
 app.all( "/admin/renameDatabase/:from_db-:to_db", function adm_renameDatabase( req, res, next) {
+	req.mongodb.close()
 	res.end( '{"error":"Not supported"}' )
 })
 // 4. dropCollection
 app.all( "/admin/dropCollection/:database/:collection", function adm_dropCollection( req, res, next){
 	req.mongodb.dropCollection( req.params.collection, function _( err, ret ){
 		if( err ) res.end( JSON.stringify( {error:err.message} ) ) 
-		else res.end( '{success:1}' )
+		else { req.mongodb.close(); res.end( '{success:1}' ) }
 	})
 } )
 // 5. renameCollection
 app.all( "/admin/renameCollection/:database/:from_collection-:to_collection", function adm_renameCollection( req, res, next ){
 	req.mongodb.renameCollection( req.params.from_collection, req.params.to_collection, function _( err, ret ){
 		if( err ) res.end( JSON.stringify( {error:err.message} ) ) 
-		else res.end( '{success:1}' )
+		else { req.mongodb.close(); res.end( '{success:1}' ) }
 	})
 } )
 
@@ -205,6 +210,7 @@ app.all( "/admin/renameCollection/:database/:from_collection-:to_collection", fu
 // = listCollections
 app.get( "/:database/listCollections", function adm_listCollections( req, res, next ) {
 	req.mongodb.listCollections().toArray( function _( err, collections ){
+		req.mongodb.close()
 		collections.sort( function _( a, b ){ return a.name.localeCompare( b.name ) } )
 		res.end( JSON.stringify( collections ) )
 	})
@@ -218,6 +224,7 @@ app.get( "/:database/:collection", function( req, res, next ){
 	} else {
 		let collection = req.mongodb.collection( req.params.collection )
 		collection.findOne( {_id:"index.html"}, function( err, ret ) {
+			req.mongodb.close()
 			if( err ) res.send( JSON.stringify( {error:err.message} ) )
 			else {
 				res.setHeader('Content-type', 'text/html' );
@@ -247,6 +254,7 @@ app.get( '/:database/:collection', function find( req, res, next ){
 		let c2 = cursor.find( filter, fields )
 		if( sort ) c2 = c2.sort( sort );  if( skip ) c2 = c2.skip( skip );  if( limit ) c2 = c2.limit( limit )
 		c2.toArray( function _( err, documents ){
+			req.mongodb.close()
 			let len = typeof documents == 'object' ? documents.length : 0
 			let pages = limit ? Math.ceil( allFounded / limit ) : 1
 			res.send( JSON.stringify( { page: page, pages: pages, founded: allFounded, returned: len, data: documents } ) )
@@ -271,6 +279,7 @@ app.get( '/:database/:collection/:id*', function findOne( req, res, next ) {
 	collection.findOne( filter, {mimeType:1}, function( err, mimeDoc ) {
 		if( err ) res.send( JSON.stringify( {error:err.message} ) )
 		else collection.findOne( filter, sanitize(fields), function ( err, document ){
+			req.mongodb.close()
 			if( err ) res.send( JSON.stringify( {error:err.message} ) )
 			else if( !document ) res.end()
 			else if( mimeDoc && mimeDoc.mimeType && isFile ) {
@@ -317,12 +326,14 @@ app.put( '/:database/:collection', function inser( req, res, next ) {
 			}
 			req.mongodb.collection( req.params.collection )
 			.insert( bson, {safe:false}, function( err, ret ){
+				req.mongodb.close()
 				if( err ) res.send( JSON.stringify( {error:err.message,code:err.code} ) )
 				else { res.end( JSON.stringify( {success: ret.insertedCount, insertedIds: ret.insertedIds} ) )  }
 			})
 		} else {
 			req.mongodb.collection( req.params.collection )
 			.insert( sanitize( req.body ), function ( err, ret ){
+				req.mongodb.close()
 				if( err ) res.send( JSON.stringify( {error:err.message,code:err.code} ) )
 				else { res.end( JSON.stringify( {success: ret.insertedCount, insertedIds: ret.insertedIds} ) )  }
 			})
@@ -341,6 +352,7 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 	let options = { upsert: (req.query.upsert?true:false) }
 	req.mongodb.collection( req.params.collection )
 		.update( sanitize(filter), sanitize(req.body), options, function _( err, ret ){
+			req.mongodb.close()
 			if( err ) res.end( JSON.stringify({ error:err.message, code:err.code }) )
 			else res.end( JSON.stringify({ success: ret.result.nModified }) )
 		} )
@@ -353,10 +365,11 @@ app.patch( '/:database/:collection/:id*', function set( req, res, next){
 	if( req.body._id && req.body._id !== id && Object.keys(req.body).length == 1 ){
 		var collection = req.mongodb.collection( req.params.collection )
 		collection.findOne( filter, function ( err, document ){
-			if( err ) res.send( JSON.stringify( {error:err.message} ) )
+			if( err ) { req.mongodb.close(); res.send( JSON.stringify( {error:err.message} ) ) }
 			else if(document) {
 				document._id = sanitize( {_id:req.body._id} )['_id']
 				collection.insert( document, function( err, ret ){
+					req.mongodb.close()
 					if( err ) res.send( JSON.stringify( {error:err.message,code:err.code} ) )
 					else collection.remove( filter, function( err, ret ){
 						if( err ) res.end( JSON.stringify({ error:err.message, code:err.code }) )
@@ -369,6 +382,7 @@ app.patch( '/:database/:collection/:id*', function set( req, res, next){
 		let data = {$set:req.body}
 		req.mongodb.collection( req.params.collection )
 			.update( sanitize(filter), sanitize(data), function _( err, ret ){
+				req.mongodb.close()
 				if( err ) res.end( JSON.stringify({ error:err.message, code:err.code }) )
 				else res.end( JSON.stringify({ success:ret.result.nModified }) )
 			})
@@ -381,15 +395,21 @@ app.delete( '/:database/:collection/:id*', function remove( req, res, next){
 	let filter = {_id:id}
 	req.mongodb.collection( req.params.collection )
 		.remove( sanitize(filter), function _( err, ret ){
-			if( err ) res.end( JSON.stringify({ error:err.message, code:err.code }) )
-			else if( ret.result.n > 0 ) res.end( JSON.stringify( {success:ret.result.n} ) )
+			if( err ) {req.mongodb.close(); res.end( JSON.stringify({ error:err.message, code:err.code }) ) }
+			else if( ret.result.n > 0 ) { req.mongodb.close(); res.end( JSON.stringify( {success:ret.result.n} ) ) }
 			else req.mongodb.collection(req.params.collection).remove({_id:id.toString().trim()},function(err,ret){
+					req.mongodb.close()
 					if( err ) res.end( JSON.stringify({ error:err.message, code:err.code }) )
 					else res.end( JSON.stringify( {success:ret.result.n} ) )
 				})
 		})
 })
 
+// = mail
+app.notify( '/:database/:collection', function(  req, res, next ) {
+	req.mongodb.close()
+	res.end("NOTIFY")
+})
 
 /*** //Rounting ***/
 
