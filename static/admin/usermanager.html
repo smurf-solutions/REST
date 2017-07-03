@@ -69,6 +69,9 @@
 		<section id="user-roles" class="view">
 			<div><button onclick="dialogRole.displayNew()">Add Role</button>
 				<button-icon onclick="usersComponent.roles.reload()" data-title="Reload">&#10227;</button-icon>
+				<button-icon style="background:gold;padding:0 9px;border:1px solid;float:right"
+					data-title="Role with name '*' \n givs public access to collection(s)"
+				>&#8505;</button-icon>
 			</div>
 			<form>
 				<table id="list-roles" width="100%">
