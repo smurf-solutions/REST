@@ -360,15 +360,16 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 	var collection = req.mongodb.collection( req.params.collection )
 	var body = req.body
 	if( req.files ){
-		console.log( req.files )
-		/**  files = { dir1:[{file},...], dir2:{file2} }  */
+		/* приема само един файл от една променлива, ако са много взима първия */
+		/* не се интересува нито от prop(директорията), нито пт filename - използва подаденото id */
+		/**  files = { prop:{ file } }  */
 		var prop = Object.keys( req.files )[0]
-		body = { 	_id      : prop,
-					fileSize : req.files[prop].data.length,
-					mimeType : req.files[prop].mimetype,
-					"0"      : req.files[prop].data
+		var file = !Array.isArray( file ) ? req.files[prop] : req.files[prop][0] 
+		body = { 	_id      : id,
+					fileSize : file.data.length,
+					mimeType : file.mimetype,
+					"0"      : file.data
 				}
-		//createJsonForFile( prop, req.files[prop] )
 	}
 	
 	collection.update( sanitize(filter), sanitize(body), options, function _( err, ret ){
