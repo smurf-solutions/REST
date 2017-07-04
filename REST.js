@@ -369,6 +369,7 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 app.patch( '/:database/:collection/:id*', function set( req, res, next){
 	let id = req.params.id + (typeof req.params[0] !== 'undefined' ? req.params[0] : "")
 	let filter = sanitize({_id:id})
+	// = rename id -> url/:old_id, body:{_id:"new_id"}
 	if( req.body._id && req.body._id !== id && Object.keys(req.body).length == 1 ){
 		var collection = req.mongodb.collection( req.params.collection )
 		collection.findOne( filter, function ( err, document ){
@@ -376,9 +377,9 @@ app.patch( '/:database/:collection/:id*', function set( req, res, next){
 			else if(document) {
 				document._id = sanitize( {_id:req.body._id} )['_id']
 				collection.insert( document, function( err, ret ){
-					req.mongodb.close()
-					if( err ) res.send( JSON.stringify( {error:err.message,code:err.code} ) )
+					if( err ) { req.mongodb.close(); res.send( JSON.stringify( {error:err.message,code:err.code} ) ) }
 					else collection.remove( filter, function( err, ret ){
+						req.mongodb.close()
 						if( err ) res.end( JSON.stringify({ error:err.message, code:err.code }) )
 						else res.end( JSON.stringify( {success:ret.result.n} ) )
 					})
