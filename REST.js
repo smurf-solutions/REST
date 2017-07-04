@@ -65,6 +65,7 @@ let auth        = function( req ){
 					return user
 				}
 let refuseAccess = function( req, res, next ) {
+					if( req.mongodb ) req.mongodb.close()
 					res.statusCode = 401
 					res.setHeader( 'WWW-Authenticate', 'Basic realm="SMART MongoDb"')
 					displayLoginPage( req, res, next )
@@ -166,7 +167,10 @@ app.use( [ "/:database/:collection*", "/:database*", "*" ], function mdw_Authent
 })
 
 /*** Static files ***/
-app.use( express.static( root_dir + 'static/' ) )
+app.use( express.static( root_dir + 'static/' ), function( req, res, next ){
+	if( req.mongodb ) req.mongodb.close()
+	console.log( "after file" )
+})
 app.get( "/:database", function ( req, res, next ) {
 	displayLoginPage( req, res, next )
 })
