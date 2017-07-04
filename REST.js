@@ -360,6 +360,7 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 	var collection = req.mongodb.collection( req.params.collection )
 	var body = req.body
 	if( req.files ){
+		console.log( req.files )
 		/**  files = { dir1:[{file},...], dir2:{file2} }  */
 		var prop = Object.keys( req.files )[0]
 		body = { 	_id      : prop,
