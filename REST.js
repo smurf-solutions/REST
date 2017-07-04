@@ -357,12 +357,19 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 	let id = req.params.id + (typeof req.params[0] !== 'undefined' ? req.params[0] : "")
 	let filter = {_id:id}
 	let options = { upsert: (req.query.upsert?true:false) }
-	req.mongodb.collection( req.params.collection )
-		.update( sanitize(filter), sanitize(req.body), options, function _( err, ret ){
-			req.mongodb.close()
-			if( err ) res.end( JSON.stringify({ error:err.message, code:err.code }) )
-			else res.end( JSON.stringify({ success: ret.result.nModified }) )
-		} )
+	var collection = req.mongodb.collection( req.params.collection )
+	if( req.files ){
+		/**  files = { dir1:[{file},...], dir2:{file2} }  */
+		var prop = Object.keys( req.files )[0]
+		req.body = createJsonForFile( prop, req.files[prop] ) )
+	}
+	
+	collection.update( sanitize(filter), sanitize(req.body), options, function _( err, ret ){
+		req.mongodb.close()
+		if( err ) res.end( JSON.stringify({ error:err.message, code:err.code }) )
+		else res.end( JSON.stringify({ success: ret.result.nModified }) )
+	})
+
 })
 
 // = $set
