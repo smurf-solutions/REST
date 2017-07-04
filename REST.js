@@ -361,7 +361,7 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 	if( req.files ){
 		/**  files = { dir1:[{file},...], dir2:{file2} }  */
 		var prop = Object.keys( req.files )[0]
-		req.body = createJsonForFile( prop, req.files[prop] ) )
+		req.body = createJsonForFile( prop, req.files[prop] )
 	}
 	
 	collection.update( sanitize(filter), sanitize(req.body), options, function _( err, ret ){
