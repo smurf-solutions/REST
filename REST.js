@@ -65,7 +65,6 @@ let auth        = function( req ){
 					return user
 				}
 let refuseAccess = function( req, res, next ) {
-					if( req.mongodb ) req.mongodb.close()
 					res.statusCode = 401
 					res.setHeader( 'WWW-Authenticate', 'Basic realm="SMART MongoDb"')
 					displayLoginPage( req, res, next )
