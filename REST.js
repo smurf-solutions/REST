@@ -167,11 +167,7 @@ app.use( [ "/:database/:collection*", "/:database*", "*" ], function mdw_Authent
 })
 
 /*** Static files ***/
-app.use( express.static( root_dir + 'static/' ), function( req, res, next ){
-	if( req.mongodb ) req.mongodb.close()
-	console.log( "after file" )
-	next()
-})
+app.use( express.static( root_dir + 'static/' ) )
 app.get( "/:database", function ( req, res, next ) {
 	displayLoginPage( req, res, next )
 })
