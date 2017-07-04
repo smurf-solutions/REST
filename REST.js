@@ -363,9 +363,9 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 		/**  files = { dir1:[{file},...], dir2:{file2} }  */
 		var prop = Object.keys( req.files )[0]
 		body = { 	_id      : prop,
-					fileSize : reqFile.data.length,
-					mimeType : reqFile.mimetype,
-					"0"      : reqFile.data
+					fileSize : req.files[prop].data.length,
+					mimeType : req.files[prop].mimetype,
+					"0"      : req.files[prop].data
 				}
 		//createJsonForFile( prop, req.files[prop] )
 	}
