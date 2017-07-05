@@ -366,16 +366,16 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 		/* не се интересува нито от prop(директорията), нито oт filename -> използва подаденото id */
 		/* Може да се презаписват или добавят полета */
 		/**  files = { prop:{ file } }  */
-		console.log( req.files )
+		
 		var prop = Object.keys( req.files )[0]
 		var file = !Array.isArray( file ) ? req.files[prop] : req.files[prop][0] 
-		if( file ){
+		if( file && Object.keys(file).length > 0 ){
 			file.name = id
 			body = createJsonForFile( "", file )
 			body = Object.assign( body, req.body ) 
 		} else {
 			req.mongodb.close()
-			res.end({ error:"File Upload Error" })
+			res.end('{error:"File Upload Error"}')
 			return
 		}
 	}
