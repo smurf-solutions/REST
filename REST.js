@@ -138,7 +138,6 @@ app.use( [ "/:database/:collection*", "/:database*", "*" ], function mdw_Authent
 		refuseAccess( req, res, next ); return
 	} else { switch( req.method ) {
 					case "GET"    : var access = "read"; break
-					case "NOTIFY" : 
 					case "POST"   : 
 					case "PUT"    : 
 					case "PATCH"  : 
@@ -329,7 +328,9 @@ app.put( '/:database/:collection', function inser( req, res, next ) {
 					for( var i = 0; i < req.files[prop].length; i++ ) 
 						bson.push( createJsonForFile( prop, req.files[prop][i] ) )
 				} else {
-					bson.push( createJsonForFile( prop, req.files[prop] ) )
+					var body = createJsonForFile( prop, req.files[prop] )
+					// Ако е един файл, може да се презаписват или добавят полета 
+					bson.push(  Object.assign( body, req.body )  )
 				}
 			}
 			req.mongodb.collection( req.params.collection )
@@ -362,15 +363,14 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 	var body = req.body
 	if( req.files ){
 		/* приема само един файл от една променлива, ако са много взима първия */
-		/* не се интересува нито от prop(директорията), нито пт filename - използва подаденото id */
+		/* не се интересува нито от prop(директорията), нито oт filename -> използва подаденото id */
+		/* Може да се презаписват или добавят полета */
 		/**  files = { prop:{ file } }  */
 		var prop = Object.keys( req.files )[0]
 		var file = !Array.isArray( file ) ? req.files[prop] : req.files[prop][0] 
-		body = { 	_id      : id,
-					fileSize : file.data.length,
-					mimeType : file.mimetype,
-					"0"      : file.data
-				}
+		file.name = id
+		body = createJsonForFile( "", file )
+		body = Object.assign( body, req.body )  )
 	}
 	
 	collection.update( sanitize(filter), sanitize(body), options, function _( err, ret ){
@@ -429,11 +429,6 @@ app.delete( '/:database/:collection/:id*', function remove( req, res, next){
 		})
 })
 
-// = mail
-app.notify( '/:database/:collection', function(  req, res, next ) {
-	req.mongodb.close()
-	res.end("NOTIFY")
-})
 
 /*** //Rounting ***/
 

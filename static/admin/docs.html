@@ -38,11 +38,11 @@ URL:
 Структури на Методите:
 
 	GET(1) = FIND_ALL
-		url:     /:PATH ? filter={BSON} & fields={BSON} & skip(page)=NUM & limit=NUM & sort={filed:-1}
+		url:     /:PATH ? filter/find={BSON} & fields={BSON} & skip(page)=NUM & limit=NUM & sort={filed:-1}
 		body:    -
 		returns: { pages: NUM, founded: NUM, returned: NUM, data:[{JSON},{JSON}...]} <-> onError: {}
 		
-		!!! fields може да е или обект или стринг.
+		!!! fields може да е или обект или стринг (стринг е само за едно поле).
 		!!! sort   може да е или обект или стринг. Ако е стринг за посоката се взима предвид дали има минус (-) отпред
 		!!! skip е отместване на брой документи, а page номер на конкретна страница
 	
@@ -66,14 +66,26 @@ URL:
 		url:     /:PATH/:id ? upsert=0 
 		body:    [FormData]
 		returns: {success:NUM_CHANGED_RECORDS} <-> onError: {error:STRING, code:NUM}
+		
+		!!! Ако FormData съдържа ФАЙЛОВЕ, ще използва първия, а другите полета 
+			ще ги добави/презапише върху записа на файла (например полето name)
+		!!! Името на ФАЙЛА е :id-то
+
 	PUT = INSERT  
-		url:     -
+		url:     /:PATH
 		body:    [FormData]
 		returns: { success: NUMBER_RECORDS, insertedIds: ARRAY_OF_INSERTED_IDS } <-> onError: {error:STRING,code:11000}
+		
+		!!! Ако FormData съдържа много ФАЙЛОВЕ, ще ги запише като игнорира останалите полета
+		!!! Ако FormData съдържа един ФАЙЛ, другите полета 
+			ще ги добави/презапише върху записа на файла (например полето name)
+		!!! Името на ФАЙЛА/ОВЕТЕ се образува от сбора на input[name]+file.name 
+		
 	PATCH = $SET -  partial modifications to a resource
 		url:     /:PATH ? filter={BSON} & multy=1
 		body:    [FormData]
 		returns: { success: NUM_CHANGED_RECORDS }  <-> onError: { error: STRING, code: NUM }
+	
 	DELETE = REMOVE
 		url:     /:PATH/:id
 		body:    -
