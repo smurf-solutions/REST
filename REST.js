@@ -375,7 +375,7 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 			body = Object.assign( body, req.body ) 
 		} else {
 			req.mongodb.close()
-			res.end('{error:"File Upload Error"}')
+			res.end('{"error":"File Upload Error"}')
 			return
 		}
 	}
