@@ -366,11 +366,14 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 		/* не се интересува нито от prop(директорията), нито oт filename -> използва подаденото id */
 		/* Може да се презаписват или добавят полета */
 		/**  files = { prop:{ file } }  */
+		console.log( req.files )
 		var prop = Object.keys( req.files )[0]
 		var file = !Array.isArray( file ) ? req.files[prop] : req.files[prop][0] 
-		file.name = id
-		body = createJsonForFile( "", file )
-		body = Object.assign( body, req.body ) 
+		if( file ){
+			file.name = id
+			body = createJsonForFile( "", file )
+			body = Object.assign( body, req.body ) 
+		}
 	}
 	
 	collection.update( sanitize(filter), sanitize(body), options, function _( err, ret ){
