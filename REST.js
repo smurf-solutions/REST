@@ -370,7 +370,7 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 		var file = !Array.isArray( file ) ? req.files[prop] : req.files[prop][0] 
 		file.name = id
 		body = createJsonForFile( "", file )
-		body = Object.assign( body, req.body )  )
+		body = Object.assign( body, req.body ) 
 	}
 	
 	collection.update( sanitize(filter), sanitize(body), options, function _( err, ret ){
