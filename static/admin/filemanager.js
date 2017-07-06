@@ -76,7 +76,8 @@ var tree = {
 tree.list.load = function( dbName, collName ) {
 	if( dbName && collName ){
 		var filter = document.getElementById("tree-filter").value
-		ajax( "GET", "/"+dbName+"/"+collName+'?filter={mimeType:{$exists:1,$ne:""},_id:/'+filter+'/}&fields={_id:1}', function ( data ){
+		//if( !filter ) filter = "|"
+		ajax( "GET", "/"+dbName+"/"+collName+'?filter={mimeType:{$exists:1,$ne:""},_id:/.*'+filter+'.*/}&fields={_id:1}', function ( data ){
 			tree.list.render( data.data )
 		})
 	} else {
