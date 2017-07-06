@@ -68,14 +68,16 @@ colls.selector.setActive = function( collName ){
 var tree = {
 	list     : { instance: document.querySelector( "section#tree > ul" ) },
 	selector : { instance: document.querySelector( "section#tree > ul" ) },
-	pager    : { instance: document.querySelector( "section#tree > header > input" ) },
+	//pager    : { instance: document.querySelector( "section#tree > header > input" ) },
 	filter   : { instance: document.querySelector( "section#tree > header > select" ) },
 	uploader : { instance: document.querySelector( "#upload-file-form" ) }
 }
 
 tree.list.load = function( dbName, collName ) {
 	if( dbName && collName ){
-		ajax( "GET", "/"+dbName+"/"+collName+'?filter={mimeType:{$exists:1,$ne:""}}&fields={_id:1}', function ( data ){
+		var filter = tree.filter.value
+		console.log( filter )
+		ajax( "GET", "/"+dbName+"/"+collName+'?filter={mimeType:{$exists:1,$ne:""},_id:/'+filter+'/}&fields={_id:1}', function ( data ){
 			tree.list.render( data.data )
 		})
 	} else {
@@ -212,7 +214,7 @@ file.editor.renderText = function( d ){
 	file.editor.iAce.session.setMode("ace/mode/" + d.mimeType.split("/")[1])
 	file.editor.iAce.commands.addCommand({
 		name: 'Save', bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
-		exec: function(editor) {
+		exec: function (editor) {
 			app.onSaveFile()
 		}, readOnly: false 
 	});
@@ -251,7 +253,7 @@ file.modifier.save = function( path, fileName ) {
 	var content = file.editor.iAce.getValue()
 	var fdata = new FormData
 	fdata.append("0", content)
-	ajax( "PATCH", url, function( d ){
+	ajax( "PATCH", url, function ( d ){
 		if( d.success ) toast( "The change is recorded" )
 	}, fdata)
 }
@@ -260,7 +262,7 @@ file.modifier.newFile = function( path ){
 	if( url ) {
 		var ext = url.split(".").pop()
 		//var ext_mime = {"html":"text/html","css":"text/css","js":"application/javascript"}
-		ajax( "POST", url+"?upsert=1", function(ret){ 
+		ajax( "POST", url+"?upsert=1", function (ret){ 
 			app.onCollectionChanged( app.collection )
 			toast("New File created")
 		}, appendFormData( new FormData, {mimeType: "text/"+ext //(ext_mime[ext] || "text/plain") 
@@ -268,10 +270,10 @@ file.modifier.newFile = function( path ){
 	}
 }
 file.modifier.mime = function( url ){
-	ajax( "GET", url+"?fields=mimeType", function( mime ){
+	ajax( "GET", url+"?fields=mimeType", function ( mime ){
 		mime = prompt( "New mime Type:", mime )
 		if( mime ) {
-			ajax( "PATCH", url, function( ret ){
+			ajax( "PATCH", url, function ( ret ){
 				if( ret.success ) app.onTreeSelectionChanged( app.document )
 			}, appendFormData( new FormData, {mimeType:mime}) )
 		}
