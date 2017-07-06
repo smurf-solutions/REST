@@ -69,14 +69,14 @@ var tree = {
 	list     : { instance: document.querySelector( "section#tree > ul" ) },
 	selector : { instance: document.querySelector( "section#tree > ul" ) },
 	//pager    : { instance: document.querySelector( "section#tree > header > input" ) },
-	filter   : { instance: document.querySelector( "section#tree > header > input" ) },
+	filter   : { instance: document.getElementById( "tree-filter" ) },
 	uploader : { instance: document.querySelector( "#upload-file-form" ) }
 }
 
 tree.list.load = function( dbName, collName ) {
 	if( dbName && collName ){
 		var filter = tree.filter.value
-		console.log( filter )
+		//console.log( filter )
 		ajax( "GET", "/"+dbName+"/"+collName+'?filter={mimeType:{$exists:1,$ne:""},_id:/'+filter+'/}&fields={_id:1}', function ( data ){
 			tree.list.render( data.data )
 		})
