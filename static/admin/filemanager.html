@@ -32,13 +32,15 @@
 		
 		
 		<!-- TREE -->
-		<section id="tree" style="float:left;width:200px">
+		<section id="tree" style="float:left;width_:200px">
 			<header style="margin:0;">
-				<input id="tree-filter" onkeyup="app.reloadTree()" style="width:122px;border-width:1px 1px 0 0; height:27px;box-sizing:border-box; margin-left:1px;" type="search" placeholder=".*">
-				<!-- <button-icon  data-title="Filter" style="opacity:0;width:122px; height: 28px;box-sizing:border-box"><span style="transform: rotate(45deg);display:inline-block">&#9906;</span></button-icon> -->
-				<button-icon data-title="Reload" onclick="app.reloadTree()" style="width:25px">&#10227;</button-icon>
-				<button-icon data-title="Upload a file" style="width:25px" onclick="app.onUploadFile()">&#8683</button-icon>
-				<button-icon data-title="Add New File" onclick="app.onSaveNewFile()" style="width:25px;font-weight:bold">+</button-icon>
+				<input id="tree-filter" onkeyup="app.reloadTree()" style="width:120px;float:left;border-width:1px 1px 0 0; height:27px;box-sizing:border-box; margin-left:1px;" type="search" placeholder=".*">
+				<div style="float:left">
+					<!-- <button-icon  data-title="Filter" style="opacity:0;width:122px; height: 28px;box-sizing:border-box"><span style="transform: rotate(45deg);display:inline-block">&#9906;</span></button-icon> -->
+					<button-icon data-title="Reload" onclick="app.reloadTree()" style="width:25px">&#10227;</button-icon>
+					<button-icon data-title="Upload a file" style="width:25px" onclick="app.onUploadFile()">&#8683</button-icon>
+					<button-icon data-title="Add New File" onclick="app.onSaveNewFile()" style="width:25px;font-weight:bold">+</button-icon>
+				</div>
 			</header>
 			<ul style="border:1px solid #ccc; border-width:1px 0 0 1px; height:calc(100% - 37px); overflow-y:scroll; width:100%; box-sizing:border-box; margin:0;padding:0"></ul>
 			<template class="tree" hidden>
