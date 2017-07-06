@@ -18,11 +18,11 @@
 	<div class="layout">
 		
 		<!-- Collections -->
-		<section id="collections" style="float:left;width:200px">
+		<section id="collections" style="float:left;width_:200px">
 			<header style="margin-bottom:10px">
 				<select class="dbs" style="width:calc(100% + 1px);border-bottom:0; box-sizing:border-box; font-weight:bold;" onchange="app.onDatabaseChanged( this.value )"></select>
 			</header>
-			<ul></ul>
+			<ul style="padding-left:28px"></ul>
 			<template >
 				<li class="hover-reversed" onclick="app.onCollectionChanged( this.getAttribute('data-value') )">
 					<span class="title"></span>
@@ -34,7 +34,7 @@
 		<!-- TREE -->
 		<section id="tree" style="float:left;width:200px">
 			<header style="margin:0;">
-				<input id="tree-filter" onkeyup="app.reloadTree()" style="width:122px;border-width:1px 1px 0 0; height:27px;box-sizing:border-box;" type="search" >
+				<input id="tree-filter" onkeyup="app.reloadTree()" style="width:122px;border-width:1px 1px 0 0; height:27px;box-sizing:border-box; margin-left:1px;" type="search" placeholder=".*">
 				<!-- <button-icon  data-title="Filter" style="opacity:0;width:122px; height: 28px;box-sizing:border-box"><span style="transform: rotate(45deg);display:inline-block">&#9906;</span></button-icon> -->
 				<button-icon data-title="Reload" onclick="app.reloadTree()" style="width:25px">&#10227;</button-icon>
 				<button-icon data-title="Upload a file" style="width:25px" onclick="app.onUploadFile()">&#8683</button-icon>
