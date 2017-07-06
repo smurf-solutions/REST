@@ -69,7 +69,7 @@ var tree = {
 	list     : { instance: document.querySelector( "section#tree > ul" ) },
 	selector : { instance: document.querySelector( "section#tree > ul" ) },
 	//pager    : { instance: document.querySelector( "section#tree > header > input" ) },
-	filter   : { instance: document.querySelector( "section#tree > header > select" ) },
+	filter   : { instance: document.querySelector( "section#tree > header > input" ) },
 	uploader : { instance: document.querySelector( "#upload-file-form" ) }
 }
 
