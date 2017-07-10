@@ -170,6 +170,22 @@ file.head.render = function( url, mimeType ){
 	file.head.instance.querySelector( "label" ).innerHTML = '<a target="_null" data-title="Onpen in new tab" href="'+url+'">' + url + '</a>' 
 }
 
+file.editor.saveProgress = function(){
+	var progress = {
+		pos: file.editor.iAce.selection.getCursor(),
+		sel: file.editor.iAce.getSelectionRange()
+	}
+	localStorage.setItem( app.getUrl(), JSON.stringify(progress) )
+}
+file.editor.readProgress = function(){
+	var progress = JSON.parse(localStorage.getItem( app.getUrl() ))
+	if( progress ){
+		if( progress.pos ) file.editor.iAce.gotoLine( progress.pos.row+1, progress.pos.column, true )
+		if( progress.sel ) file.editor.iAce.selection.setRange( progress.sel )
+	}
+	file.editor.iAce.focus()
+}
+
 file.editor.load = function( url ){
 	var fileName = url.split("/").pop()
 	if( fileName !== "-" && fileName !== "" ){
@@ -202,6 +218,7 @@ file.editor.renderImage = function( url ){
 	file.editor.iImage.src = url
 }
 file.editor.renderText = function( d ){
+	
 	var data = d["0"]
 	file.editor.iEditor.hidden = false
 	file.editor.iImage.hidden = true
@@ -221,6 +238,8 @@ file.editor.renderText = function( d ){
 	file.editor.iAce.clearSelection()
 	
 	file.head.iSave.style.display = "inline-block"
+	
+	file.editor.readProgress()
 }
 file.editor.renderInfo = function( data ){
 	file.editor.iEditor.hidden = true
@@ -322,6 +341,11 @@ app.onCollectionChanged = function( collName ){
 }
 
 app.onTreeSelectionChanged = function( path ) {
+	// on leave save progress
+	var prevWasAce =  file.editor.iEditor.offsetParent !== null
+	if( prevWasAce ) file.editor.saveProgress()
+
+	// 
 	app.document = path
 	tree.selector.change( app.document )
 	file.editor.load( app.getUrl() )
@@ -352,7 +376,11 @@ app.afterUploadedFile = function() {
 	tree.list.load( app.database, app.collection )
 }
 app.reloadTree = function(){
+	app.reloadCollections()
 	tree.list.load( app.database, app.collection )
+}
+app.reloadCollections = function(){
+	colls.selector.load( app.database )
 }
 
 app.onSaveNewFile = function(){
