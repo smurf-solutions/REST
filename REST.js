@@ -214,6 +214,8 @@ app.all( "/admin/renameCollection/:database/:from_collection-:to_collection", fu
 
 /*** DB ***/
 
+// = mail -> https://medium.com/@pandeysoni/nodemailer-service-in-node-js-using-smtp-and-xoauth2-7c638a39a37e
+
 // = listCollections
 app.get( "/:database/listCollections", function adm_listCollections( req, res, next ) {
 	req.mongodb.listCollections().toArray( function _( err, collections ){
@@ -388,7 +390,7 @@ app.post( '/:database/:collection/:id*', function update( req, res, next ) {
 
 })
 
-// = $set
+// = $set | $push
 app.patch( '/:database/:collection/:id*', function set( req, res, next){
 	let id = req.params.id + (typeof req.params[0] !== 'undefined' ? req.params[0] : "")
 	let filter = sanitize({_id:id})
@@ -410,7 +412,9 @@ app.patch( '/:database/:collection/:id*', function set( req, res, next){
 			} else res.end( '{"error":"WRONG ID !!!"}' )
 		})
 	} else {
-		let data = {$set:req.body}
+		let data 
+		if(req.query.push) data = {$push:{[req.query.push]:req.body}}
+		else data = {$set:req.body}
 		req.mongodb.collection( req.params.collection )
 			.update( sanitize(filter), sanitize(data), function _( err, ret ){
 				req.mongodb.close()
