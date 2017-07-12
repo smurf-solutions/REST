@@ -415,6 +415,7 @@ app.patch( '/:database/:collection/:id*', function set( req, res, next){
 		let data 
 		if(req.query.push) data = {$push:{[req.query.push]:req.body}}
 		else data = {$set:req.body}
+		console.log(data)
 		req.mongodb.collection( req.params.collection )
 			.update( sanitize(filter), sanitize(data), function _( err, ret ){
 				req.mongodb.close()
