@@ -81,10 +81,12 @@ URL:
 			ще ги добави/презапише върху записа на файла (например полето name)
 		!!! Името на ФАЙЛА/ОВЕТЕ се образува от сбора на input[name]+file.name 
 		
-	PATCH = $SET -  partial modifications to a resource
-		url:     /:PATH ? filter={BSON} & multy=1
+	PATCH = $SET | $PUSH -  partial modifications to a resource
+		url:     /:PATH ? filter={BSON} & multy=1 || push=field.name
 		body:    [FormData]
 		returns: { success: NUM_CHANGED_RECORDS }  <-> onError: { error: STRING, code: NUM }
+		
+		!!! по подразбиране се изпълнява $set, при задаване на $push - FormData се слага в арей с ключ стойността на push
 	
 	DELETE = REMOVE
 		url:     /:PATH/:id
