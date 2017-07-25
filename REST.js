@@ -142,6 +142,12 @@ app.use( [ "/:database/:collection*", "/:database*", "*" ], function mdw_Authent
 					case "PUT"    : 
 					case "PATCH"  : 
 					case "DELETE" : var access = "write"; break
+					////////////////////////////////
+					case "FIND"   : var access = "read"; break
+					case "INPUT"  : 
+					case "UPDATE" : 
+					case "REMOVE" : var access = "write"; break
+					////////////////////////////////
 					default       : refuseAccess( req, res, next ); return
 				}
 		req.mongodb.collection( 'db.users' ).findOne({ _id:creds.name, pwd:creds.pass },{ roles:true },function( err, foundUser ){
@@ -213,6 +219,49 @@ app.all( "/admin/renameCollection/:database/:from_collection-:to_collection", fu
 
 
 /*** DB ***/
+// NEW MONGO
+// FIND   -> /:db/:col ? find={} & fields={}     & options={}
+// UPDATE -> /:db/:col ? find={} & data={$$data} & options={}
+// INSERT -> /:db/:col ?           data={$$data} & options={}
+// REMOVE -> /:db/:col ? find={} &                 options={}
+app.use([ "/:database/:collection*" ], function( req, res, next ){
+	var find = req.query.find ? parseJSON(req.query.find) : {}
+	var fields = req.query.fields ? parseJSON(req.query.fields): {}
+	var data = req.query.data ? parseJSON(req.queyr.data.replace( "$$data", JSON.stringify(req.body) )) : parseJSON(req.body)
+	//console.log(data)
+	var options = req.query.options ? parseJSON(req.query.options) : {}
+	var collection = req.mongodb.collection( req.params.collection )
+	
+	switch( req.method ) {
+		case "FIND":
+			collection.find( sanitize(find), sanitize(fields), sanitize(options) ).toArray(function(err, ret){
+				req.mongodb.close()
+				if( err ) 	res.end( JSON.stringify(err) )
+				else 	  	res.end( JSON.stringify( ret ) )
+			}); break
+		case "UPDATE":
+			collection.update( sanitize(find), sanitize(data), sanitize(options), function( err, ret ){
+				req.mongodb.close()
+				if( err ) 	res.end( JSON.stringify( err ) )
+				else 		res.end( JSON.stringify( ret.result ) )
+			}); break
+		case "INSERT":
+			collection.insert( sanitize(data), sanitize(options), function( err, ret ){
+				req.mongodb.close()
+				if( err ) 	res.send( JSON.stringify( err ) )
+				else 		res.end( JSON.stringify( ret ) )
+			}); break
+		case "REMOVE":
+			collection.remove( sanitize(find), sanitize(options), function( err, ret ){
+				req.mongodb.close();
+				if( err ) 	res.end( JSON.stringify( err ) ) 
+				else 		res.end( JSON.stringify( ret.result ) )
+			}); break
+		default: next()
+	}
+})
+
+// OLD 
 
 // = mail -> https://medium.com/@pandeysoni/nodemailer-service-in-node-js-using-smtp-and-xoauth2-7c638a39a37e
 
@@ -237,7 +286,7 @@ app.get( "/:database/:collection", function( req, res, next ){
 			if( err ) res.send( JSON.stringify( {error:err.message} ) )
 			else {
 				res.setHeader('Content-type', 'text/html' );
-				res.end( ret ? ret["0"] : "" )
+				res.end( ret && ret["0"] ? ret["0"] : "" )
 			}
 		})
 	}
