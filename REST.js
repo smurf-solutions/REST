@@ -286,8 +286,7 @@ app.get( "/:database/:collection", function( req, res, next ){
 			if( err ) res.send( JSON.stringify( {error:err.message} ) )
 			else {
 				res.setHeader('Content-type', 'text/html' );
-				console.log( res )
-				res.end( ret ? ret["0"] : "" );
+				res.end( ret ? ret["0"].toString() : "" );
 			}
 		})
 	}
