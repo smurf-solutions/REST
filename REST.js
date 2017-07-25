@@ -292,7 +292,7 @@ app.get( "/:database/:collection", function( req, res, next ){
 					toRet = ret[0]
 					//&& ret["0"] ? ret["0"] : ""
 				}
-				res.end( toRet )
+				res.end( ret ? ret["0"] : "" )
 			}
 		})
 	}
