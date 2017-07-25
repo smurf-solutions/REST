@@ -289,7 +289,7 @@ app.get( "/:database/:collection", function( req, res, next ){
 				var toRet = "" 
 				if( typeof ret == "object" ){
 					console.log( typeof ret )
-					toRet = ret.0
+					toRet = ret[0]
 					//&& ret["0"] ? ret["0"] : ""
 				}
 				res.end( toRet )
