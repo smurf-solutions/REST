@@ -286,7 +286,7 @@ app.get( "/:database/:collection", function( req, res, next ){
 			if( err ) res.send( JSON.stringify( {error:err.message} ) )
 			else {
 				res.setHeader('Content-type', 'text/html' )
-				var toRet = ret && ret["0"] ? ret["0"] : ""
+				var toRet = ret["0"] ? ret["0"] : ""
 				res.end( toRet )
 			}
 		})
