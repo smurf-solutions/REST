@@ -353,7 +353,7 @@ app.get( '/:database/:collection/:id*', function findOne( req, res, next ) {
 					headParams['Content-disposition'] = 'attachment;filename=' + document._id.split("/").pop()
 				
 				res.writeHead( code, headParams )
-				res.end( data.toString() );
+				res.end( data );
 			} else {
 				res.send( document )
 			}
