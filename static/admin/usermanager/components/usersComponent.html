@@ -1,0 +1,59 @@
+<!-- Table USERS -->
+<table width="100%">
+	<caption>Users
+		<div style="float:right">
+			<a class="icon" onclick="usersList.refresh()">&#x27F3;</a>
+			<a class="icon" onclick="if(db)dialogNewUser.show({newUser:true})">+</a>
+		</div>
+	</caption>
+	<thead><tr>
+			<th>User</th>
+			<th width="1px"></th>
+		</tr></thead>
+	<tbody id="usersList" data-url="/${db}/db.users/find">
+		<tr>
+			<td>${_id}</td>
+			<td style="white-space:nowrap">
+				<a class="icon" onclick="setPasswd('${_id}')" title="Set password">${password?'***':'&#128273;'}</a>
+				<a class="icon" onclick="dialogEditUser.show({_id:'${_id}'})">Edit</a>
+				<a class="icon" onclick="removeUser('${_id}')">&times;</a>
+			</td>
+		</tr>
+		<tr role="empty"><td colspan="2"><i>No data</i></td></tr>
+		<script>
+			function removeUser(id_user){
+				if(confirm("DELETE user: \n"+id_user)){
+					ajax('/'+window['db']+'/db.users/deleteOne?{_id:"'+id_user+'"}', ()=>{
+						dispatchEvent(new Event('refresh',{bubbles:true}))
+					})
+				}
+			}
+			function setPasswd(id_user){
+				var newPass = prompt("Enter new password:")
+				if(newPass!==null){
+					ajax( '/'+db+'/db.users/update?{_id:"'+id_user+'"}&{$set:{password:"'+newPass+'"}}', ()=>{
+						dispatchEvent(new Event('refresh',{bubbles:true})) 
+					})
+				}
+			}
+		</script>
+	</tbody>
+</table>
+
+
+<!-- Dialog Edit USER-->
+<dialog id="dialogEditUser"
+	data-template="components/formEditUser.html"
+	data-if="typeof _id !== 'undefined'"
+	data-onsuccess="usersList.refresh(); this.instance.hide()" 
+></dialog>
+
+<!-- Dialog NEW USER -->
+<dialog id="dialogNewUser" 
+	data-template="components/formNewUser.html"
+	data-if="typeof newUser !== 'undefined'"
+	data-onsuccess="usersList.refresh(); this.instance.hide()"
+></dialog>
+
+
+		

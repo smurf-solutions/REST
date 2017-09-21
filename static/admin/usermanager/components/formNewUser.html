@@ -1,0 +1,23 @@
+<form 	action="/${db}/db.users/insert" method="AJAX"
+		data-onerror="alert( event.detail.error.errmsg )">
+	<big><b>New user</b></big>
+	<p>
+		<label>Login name:* <input name="_id" required value="" autofocus> </label>
+	</p>
+	<p>
+		<label>Full Name: <input name="name" value=""> </label>
+	</p>
+	<p>
+		<label>Email: <input type="email" name="email" value=""></label>
+	</p>
+	<p>
+		<label>Phone: <input type="phone" name="phone" value=""> </label>
+	</p>
+	
+	<br>
+	<div style="text-align:right">
+		<button class="accent">Save</button> 	
+		<button class="transparent" type="button" 
+			onclick="dispatchEvent(new Event('hide',{bubbles:true}))">Cancel</button>
+	</div>
+</form>

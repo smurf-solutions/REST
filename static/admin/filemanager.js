@@ -35,7 +35,7 @@ var colls = {
 
 colls.selector.load = function( dbName ){
 	if( dbName ) {
-		ajax( "GET", "/"+dbName+"/listCollections", function ( data ) {
+		ajax( "GET", "/admin/"+dbName+"/listCollections", function ( data ) {
 			colls.selector.render( data )
 		})
 	} else {
@@ -49,13 +49,15 @@ colls.selector.render = function( data ) {
 	list.textContent = ""
 	data.forEach( function ( row ){
 		var cloneTpl = liTpl.cloneNode( true )
-		cloneTpl.textContent = row.name
-		cloneTpl.setAttribute( "data-value", row.name )
+		cloneTpl.querySelector(".title").textContent = row.name
+		cloneTpl.setAttribute( "data-value", row.name)
+		cloneTpl.setAttribute( "data-path", "/"+app.database+"/"+row.name )
 		list.appendChild( cloneTpl )
 	})
 }
 colls.selector.setActive = function( collName ){
 	var list = colls.selector.instance.querySelector( "ul" )
+	if(!list) return
 	var old = list.querySelector(".active")
 	if(old) old.classList.remove("active")
 	list.querySelector( "[data-value='"+collName+"']" ).classList.add("active")
@@ -76,9 +78,10 @@ var tree = {
 tree.list.load = function( dbName, collName ) {
 	if( dbName && collName ){
 		var filter = document.getElementById("tree-filter").value
-		if( !filter ) filter = ".*"
-		ajax( "GET", "/"+dbName+"/"+collName+'?filter={mimeType:{$exists:1,$ne:""},_id:/'+filter+'/}&fields={_id:1}&sort={_id:1}&limit=300', function ( data ){
-			tree.list.render( data.data )
+		if( !filter.length ) filter = "."
+		filter = filter.replace(/\./g, "\\.")
+		ajax( "GET", "/"+dbName+"/"+collName+'/find?{_id:/'+filter+'/}&fields={_id:1}&options={sort:{_id:1},limit:300}', function ( data ){
+			tree.list.render( data )
 		})
 	} else {
 		tree.list.render( [] )
@@ -88,13 +91,14 @@ tree.list.render = function( data ){
 	tree.list.instance.textContent = ""
 	let row_tpl = document.querySelector( "template.tree" ).content.querySelector( "li" )
 
-	data.forEach( function ( row ) {
-		let li = row_tpl.cloneNode( true )
-		li.textContent = row._id
-		li.setAttribute( "data-path", row._id )
-		tree.list.instance.appendChild( li )
-	})
-	if(!data.length) tree.list.instance.innerHTML = '<li style="color:#aaa;text-align:center">-- No files found --</div>'
+	if( typeof data == 'object' && !data.error )
+		data.forEach( function ( row ) {
+			let li = row_tpl.cloneNode( true )
+			li.querySelector(".title").textContent = row._id
+			li.setAttribute( "data-path", row._id )
+			tree.list.instance.appendChild( li )
+		})
+	if(!data.length) tree.list.instance.innerHTML = '<li style="color:#aaa;text-align:center">-- No records found --</div>'
 }
 
 
@@ -120,11 +124,10 @@ tree.uploader.pushFiles = function( path, cb ) {
 	if( dir !== null ){
 		var fData = new FormData
 		dir = ( dir+"/" ).replace( /^\//, "").replace(/\/\//g,"/")
-		//fData.append( "directory", dir  )
 		for( var i = 0; i < files.length; i++) {
 			fData.append( dir, files[i] )
-		}		
-		ajax( "PUT", path, cb, fData)
+		}	
+		ajax( "POST", path+"/insert", cb, fData)
 	}	
 }
 
@@ -137,7 +140,7 @@ var file = {
 		iSave: document.querySelector( "section#file > header [name=save]" ),
 		iRename: document.querySelector( "section#file > header [name=rename]" ),
 		iDelete: document.querySelector( "section#file > header [name=delete]" ),
-		iMime: document.querySelector( "section#file > header [name=mime]" )
+		iDownload: document.querySelector( "section#file > header [name=download]" )
 	},
 	editor: { 
 		iAce: ace.edit("file-editor"),
@@ -149,25 +152,30 @@ var file = {
 	modifier: {}
 }
 
-file.head.render = function( url, mimeType ){
-	var save   = false,
-		rename = true,
-		remove = true,
-		mime   = true
-	var isFile = url.replace(/^\//,"").split("/").length > 2
+file.head.render = function( url, /*mimeType,*/ size ){
+	var save     = false,
+		rename   = true,
+		remove   = true,
+		download = true
 	
-	if( !isFile ) save = rename = remove = mime = false
-	else switch( mimeType ){
-		case 'text/html':
-		case 'text/plain': save = true
+	var filename = url.split("/").pop()
+	var ext 	 = filename.split(".").pop().toLowerCase()
+	var isFile   = filename.indexOf(".") > -1 
+	
+	if( !isFile ) {
+			save = false
+	} else {
+		if(["txt","html","css","js","ts"].indexOf(ext) > -1)
+			save = true
 	}
 	
-	file.head.iSave.style.display   = save   ? "inline-block" : "none"
-	file.head.iRename.style.display = rename ? "inline-block" : "none"
-	file.head.iDelete.style.display = remove ? "inline-block" : "none"
-	file.head.iMime.style.display   = mime   ? "inline-block" : "none"
+	file.head.iSave.style.display     = save     ? "inline-block" : "none"
+	file.head.iRename.style.display   = rename   ? "inline-block" : "none"
+	file.head.iDelete.style.display   = remove   ? "inline-block" : "none"
+	file.head.iDownload.style.display = download ? "inline-block" : "none"
 	
-	file.head.instance.querySelector( "label" ).innerHTML = '<a target="_null" data-title="Onpen in new tab" href="'+url+'">' + url + '</a>' 
+	file.head.instance.querySelector( "label" ).innerHTML = '<a target="_null" data-title="Onpen in new tab" href="'+url+'">' + url + '</a>'
+		+'&nbsp;&nbsp;&nbsp;<span class="fileSize">'+size+'</span>'
 }
 
 file.editor.saveProgress = function(){
@@ -189,22 +197,19 @@ file.editor.readProgress = function(){
 file.editor.load = function( url ){
 	var fileName = url.split("/").pop()
 	if( fileName !== "-" && fileName !== "" ){
-		ajax( "GET", url+"?fields={}", function ( data ){
-			file.head.render( url, data.mimeType )
-			switch( data.mimeType ) {
-				case "text/html":
-				case "text/plain":
-				case "text/css":
-				case "application/x-javascript": case "application/javascript": case "text/javascript": case "text/js":
-				case "application/json": file.editor.renderText( data ); break
-				
-				case "image/png":
-				case "image/gif":
-				case "image/x-icon":
-				case "image/jpeg": file.editor.renderImage( url ); break 
-				
-				default : file.editor.renderInfo( data )
-			}
+		ajax( "GET", app.getPath()+"/findOne?{_id:\""+app.document+"\"}", function ( data ){
+			if(data){
+				var size = data[0] ? data[0].length : 0
+				file.head.render( url, /*data.mimeType,*/ size ? " "+fileSize( size ) : "" )
+				var ext = app.document.split(".").pop().toLowerCase()
+				if( ['txt','html','xml','css','js','ts','json'].indexOf(ext) > -1 ){
+						file.editor.renderText( data ); 
+				} else if( ['png','gif','jpg','jpeg','ico'].indexOf(ext) >-1 ) {
+						file.editor.renderImage( url )
+				} else {
+					file.editor.renderInfo( data )
+				}
+			} else file.editor.renderInfo("")
 		})
 	} else {
 		file.editor.renderInfo( "" )
@@ -217,86 +222,125 @@ file.editor.renderImage = function( url ){
 
 	file.editor.iImage.src = url
 }
-file.editor.renderText = function( d ){
-	
-	var data = d["0"]
-	file.editor.iEditor.hidden = false
-	file.editor.iImage.hidden = true
-	file.editor.iInfo.hidden = true
-	
-	var base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
-	if( base64regex.test( data ) ) data = atob(data)
+
+file.editor._isAceInited = false
+file.editor._initAce = function(){
 	file.editor.iAce.$blockScrolling = Infinity
-	file.editor.iAce.setValue( data || "" )
-	file.editor.iAce.session.setMode("ace/mode/" + d.mimeType.split("/")[1])
 	file.editor.iAce.commands.addCommand({
 		name: 'Save', bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
 		exec: function (editor) {
 			app.onSaveFile()
 		}, readOnly: false 
 	});
+	file.editor.iAce.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: false
+    });
+	file.editor._isAceInited = true
+}
+file.editor.renderText = function( d ){
+	var data = d["0"]
+	file.editor.iEditor.hidden = false
+	file.editor.iImage.hidden = true
+	file.editor.iInfo.hidden = true
+	
+	if( !file.editor._isAceInited )
+		file.editor._initAce()
+	
+	var base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+	if( base64regex.test( data ) ) data = atob(data)
+	data = data || ""
+	file.editor.iAce.setValue( data )
+	
+	var mode = d._id.split(".").pop().toLowerCase()
+	if( ["js","ts"].indexOf(mode) > -1 ) mode = "javascript"
+	if( ["txt"].indexOf(mode) > -1 ) mode = "text"
+	file.editor.iAce.session.setMode("ace/mode/" + mode )
+
 	file.editor.iAce.clearSelection()
-	
+
 	file.head.iSave.style.display = "inline-block"
-	
 	file.editor.readProgress()
 }
 file.editor.renderInfo = function( data ){
 	file.editor.iEditor.hidden = true
 	file.editor.iImage.hidden = true
 	file.editor.iInfo.hidden = false
-	
+
+	if(!data) data={_id:0,0:""}
+
+	var buff = data[0]||""
+	var url = "/"+app.database+"/"+app.collection+'/find'+(app.document?'?{_id:"'+app.document+'"}':'')
 	file.editor.iInfo.innerHTML = "<table>"
-			+ "<tr><th>URL:</th><td>" + (data._id || "") + "</td></tr>"
-			+ "<tr><th>File Size:</th><td>" + fileSize(data.fileSize) + "</td></tr>"
-			+ "<tr><th>Mime Type:</th><td>" + (data.mimeType || "") + "</td></tr>"
+			+ "<tr><th>ID:</th><td>" + (data._id || "") + "</td></tr>"
+			+ "<tr><th>File Size:</th><td>" + fileSize(buff.length) + "</td></tr>"
+			+ "<tr><th>URL:</th><td><a href='" + url + "' target='_null'>"+url+"</a></td></tr>"
 		+"</table>"
 }
 
-file.modifier.rename = function( url, fileName, cb ) {
-	var newName = prompt( "Rename file:", fileName )
+file.modifier.rename = function( url, oldName, cb ) {
+	var newName = prompt( "Rename file:", oldName )
 	if( newName ) {
-		ajax( "PATCH", url, cb, appendFormData( new FormData, {_id:newName} ) )
+		url = url.replace(oldName,"")
+		ajax( "GET", url+'findOneAndDuplicate?{_id:"'+oldName+'"}&{_id:"'+newName+'"}', function(doc){
+			if( doc && doc.result && doc.result.ok == 1 ){
+				ajax("GET", url+'remove?{_id:"'+oldName+'"}', cb )
+			}  else if( doc.error ){
+				alert( doc.error.errmsg )
+			} else {
+				alert("Unknown ERROR !")
+			}
+		} )
 	}
 }
 file.modifier.remove = function( url ) {
-	if( confirm( "Delete file:\n"+url ) )
-	ajax("DELETE",url,function(ret){ if(ret.success){
-		app.onCollectionChanged( app.collection )
-		toast("File deleted") 
-	}})
+	if( confirm( "DELETE file:\n"+url ) ){
+		var url = app.getPath() + "/remove?{_id:\""+app.document+"\"}"
+		ajax("GET", url, function(ret){ if( ret.ok ){
+			toast("File deleted")
+			app.onCollectionChanged( app.collection )
+		}})
+	}
 }
 file.modifier.save = function( path, fileName ) {
 	fileName = fileName.replace(/^\//, "").replace(/\/$/, "")
-	var url = path + "/" + fileName
-	var content = file.editor.iAce.getValue()
+	var url = path+"/update?{_id:\"" + fileName+"\"}&{$set:__FORM_DATA__}"
+	
 	var fdata = new FormData
-	fdata.append("0", content)
-	ajax( "PATCH", url, function ( d ){
-		if( d.success ) toast( "The change is recorded" )
+	fdata.append("0", file.editor.iAce.getValue())
+
+	ajax( "POST", url, function ( d ){
+		if( d.ok && d.ok == 1 ) {
+			if(typeof d.nModified !== 'undefined' && d.nModified==0){
+				toast( "No change was made" )
+			} else 
+				toast( "The change is SAVED" )
+		} else alert(d)
 	}, fdata)
 }
 file.modifier.newFile = function( path ){
-	var url = prompt( "File Path / Name:", path.replace(/\/$/,"")+"/" )
+	path = path.replace(/\/$/,"")+"/"
+	var url = prompt( "File URL:", path )
 	if( url ) {
-		var ext = url.split(".").pop()
-		//var ext_mime = {"html":"text/html","css":"text/css","js":"application/javascript"}
-		ajax( "POST", url+"?upsert=1", function (ret){ 
-			app.onCollectionChanged( app.collection )
-			toast("New File created")
-		}, appendFormData( new FormData, {mimeType: "text/"+ext //(ext_mime[ext] || "text/plain") 
-			} ) )
-	}
-}
-file.modifier.mime = function( url ){
-	ajax( "GET", url+"?fields=mimeType", function ( mime ){
-		mime = prompt( "New mime Type:", mime )
-		if( mime ) {
-			ajax( "PATCH", url, function ( ret ){
-				if( ret.success ) app.onTreeSelectionChanged( app.document )
-			}, appendFormData( new FormData, {mimeType:mime}) )
+		let [db,coll] = url.replace(/^\//,"").split("/")
+		var id = "/"+url.replace(path,"")
+		var hasExt = id.indexOf(".") > -1
+		
+		if(!db || !coll || !id || !hasExt ){
+			alert("Wrong File URL: "+url)
+		} else {
+			url = "/"+db+"/"+coll+'/insert?{_id:"'+id+'","0":""}'
+			ajax( "GET", url, function (ret){
+				if(ret.result && ret.result.ok && ret.result.ok == 1){
+					app.onCollectionChanged( app.collection )
+					toast("New File created")
+				} else {
+					alert(ret)
+				}
+			})
 		}
-	})
+	}
 }
 
 
@@ -324,6 +368,10 @@ app.getUrl = function(){
 
 //
 app.onDatabaseChanged = function( dbName ) {
+	// on leave save progress
+	var prevWasAce =  file.editor.iEditor.offsetParent !== null
+	if( prevWasAce ) file.editor.saveProgress()
+	
 	app.database = dbName
 	app.collection = ""
 	app.document = ""
@@ -333,6 +381,10 @@ app.onDatabaseChanged = function( dbName ) {
 }
 
 app.onCollectionChanged = function( collName ){
+	// on leave save progress
+	var prevWasAce =  file.editor.iEditor.offsetParent !== null
+	if( prevWasAce ) file.editor.saveProgress()
+		
 	app.collection = collName
 	app.document = ""
 	colls.selector.setActive( collName )
@@ -358,9 +410,7 @@ app.afterRenamedFile = function(){
 	tree.list.load( app.database, app.collection )
 	app.onTreeSelectionChanged( "" )
 }
-app.onChangeMime = function(){
-	file.modifier.mime( app.getUrl() )
-}
+
 app.onUploadFile = function( fileName ) {
 	if( app.database && app.collection ) {
 		if( !fileName ) {
@@ -372,8 +422,9 @@ app.onUploadFile = function( fileName ) {
 		alert( "Select Databse and Collection first !" )
 	}
 }
-app.afterUploadedFile = function() {
-	tree.list.load( app.database, app.collection )
+app.afterUploadedFile = function( res ) {
+	if( res.error ) alert( res.error.errmsg )
+	else tree.list.load( app.database, app.collection )
 }
 app.reloadTree = function(){
 	app.reloadCollections()
@@ -392,9 +443,66 @@ app.onSaveFile = function(){
 app.onDeleteFile = function(){
 	file.modifier.remove( app.getUrl() )
 }
+app.onDownload = function(){
+	window.open(app.getUrl()+"?download","_self")
+}
+app.onInportFromJSON = function(){
+	var input, file, fr, progressbar;
+	progressbar = document.querySelector( "progress" ) || {style:{display:""},value:0}
+	
+	input = document.getElementById('selectJSONfile')
+	if (!input.files[0]) {
+		alert("Please select a file before clicking 'Load'");
+    } else {
+		  progressbar.style.display = "block"
+		  file = input.files[0];
+		  fr = new FileReader();
+		  fr.onload = receivedText;
+		  fr.readAsText(file);
+    }
+
+    function receivedText(e) {
+		function cb(ret){
+			counter -= 1
+			if( counter < 1 ){ 
+				progressbar.style.display = "none"
+				app.reloadTree()
+			}
+			if(ret.error) {
+				alert(ret.error.errmsg)
+			}
+		}
+			
+		var counter = 0
+		if(!app.database || !app.collection){
+			alert("Select database and collection, please!")
+			progressbar.style.display = "none"
+		} else {
+			try{
+				var data = JSON.parse(e.target.result);
+				var url = "/"+app.database+"/"+app.collection+"/insert"
+				if(Array.isArray(data)){
+					counter = data.length
+					data.forEach(function(row){
+						ajax("POST",url,cb,appendFormData(new FormData, row))
+					})
+				}else{
+					counter = 1
+					ajax("POST",url,cb,appendFormData(new FormData,data))
+					
+				}
+			} catch(e){
+				alert(e.toString() )
+				progressbar.style.display = "none"
+			}
+			
+		}
+    }
+}
 
 
 app.onInit = function(){
 	dbs.selector.load()
 	file.editor.load( "" )
 }()
+

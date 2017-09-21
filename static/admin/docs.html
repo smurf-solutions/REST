@@ -1,109 +1,149 @@
 ﻿<!DOCTYPE html>
 <html>
 	<head>
-		<title>Welcome</title>
-		<link rel="shortcut icon" type="image/png" href="favicon.ico" />
+		<title>Doc</title>
+		<link rel="shortcut icon" type="image/png" href="favicon.png" />
+		<link rel="stylesheet" href="style.css" />
+		<style>
+			body { padding:10px;}
+		</style>
 	</head>
 	<body>
-		<pre>
-Smurf's DATABASE
---------------------------
+<h1> Smurf's DATABASE API</h1>
 
-Интерфейс: REST
-
-Драйвер: MongoDB
-
-Формат:  JSON
-
-Методи:
-	GET    - Връща намерените полета по критериий ФИЛТЪР + нформация за броя и страниците.
-	POST   - Замества ЦЕЛИЯ документ по критерий ФИЛТЪР. Връща брой засегнати зписи.
-	PUT    - Прави нов запис. Връща новото _id.
-	PATCH  - Редактира САМО съответните полета по критерий ФИЛТЪР. Връща брой засегнати записи.
-	DELETE - Изтрива запис по критерий ФИЛТЪР. Връща брой засегнати записи.
-
-URL:
-	ПЪТ (PATH):
-		/DbName/CollName/
-	ФИЛТЪР (filter):
-		Филтриране по ID: 
-			/:ПЪТ/:id
-		Филтриране по сложен критерий:
-			/:ПЪТ?filter={name:"^name$",email:"email@email.com"}
-	ОПЦИИ:
-		Страница 2 с 20 записа и подреждане по мейл възходящо
-			/:ПЪТ?:ФИЛТЪР &skip=40&limit=20&sort={mail:1}
-
-			
-Структури на Методите:
-
-	GET(1) = FIND_ALL
-		url:     /:PATH ? filter/find={BSON} & fields={BSON} & skip(page)=NUM & limit=NUM & sort={filed:-1}
-		body:    -
-		returns: { pages: NUM, founded: NUM, returned: NUM, data:[{JSON},{JSON}...]} <-> onError: {}
-		
-		!!! fields може да е или обект или стринг (стринг е само за едно поле).
-		!!! sort   може да е или обект или стринг. Ако е стринг за посоката се взима предвид дали има минус (-) отпред
-		!!! skip е отместване на брой документи, а page номер на конкретна страница
+<h2>URL</h2>
+<pre>
+	/:db/:col:/:func ? [{param_N} & [{$set:__FORM_DATA__} ... ]] [& Query]
 	
-	GET(2) = FIND_ONE
-		url:     /:PATH/id ? fields={field1:1,field2:0,field3:1,...} 
-		body:    -
-		returns: {field1:FIELD_CONTENT, field3:FIELD_CONTENT,...} <-> onError: {}
-		
-		!!! fields НЕ трябва да е стринг String
-		
-	GET(3) = GET_FILE
-		url:     /:PATH/:id ? [ver=field  (or fields=field)] & [ download ] 
-		body:    -
-		returns: FIELD_CONTENT <-> onerror: '404'
-		
-		!!! ver (или fields) трябва да е String иначе връща JSON
-		!!! download форсира свалянето на файла
-		
+	/admin/:db/:func 
+	/admin/:func
+</pre>
 
-	POST = UPDATE 
-		url:     /:PATH/:id ? upsert=0 
-		body:    [FormData]
-		returns: {success:NUM_CHANGED_RECORDS} <-> onError: {error:STRING, code:NUM}
+<h2>Query</h2>
+<pre>
+	callback = functionWrapperOfResult
+		Returns: functionWrapperOfResult(...)
+	
+	redirect = url/of/page?__RESULT_DATA__
+		Returns: ...
+	
+	return = url/of/file/containing/model.ext
+		Returns: ... __RESULT_DATA__ ...
+	
+	download[=fileName.ext]
+		Downloadable file wit result
 		
-		!!! Ако FormData съдържа ФАЙЛОВЕ, ще използва първия, а другите полета 
-			ще ги добави/презапише върху записа на файла (например полето name)
-		!!! Името на ФАЙЛА е :id-то
+</pre>
+	
+<h2>Functions</h2>
+<h3>Collection Functions and User Rights</h3>
+<pre>
+* Relate only for collection - /:db/:col:/:functionName?[{params1}&[{params2} ... ]] [& Query]
 
-	PUT = INSERT  
-		url:     /:PATH
-		body:    [FormData]
-		returns: { success: NUMBER_RECORDS, insertedIds: ARRAY_OF_INSERTED_IDS } <-> onError: {error:STRING,code:11000}
+	find:
+		<a>find</a>
+		<a>findOne</a>
+		<a>aggregate</a>
+		<a>count</a>
+		<a>disting</a>
+		<a>geoHaystackSearch</a>
+		<a>geoNear</a>
+		<a>isCaped</a>	
+			+ --- 
+		<a>findOneAndDelete</a>
+		<a>findOneAndReplace</a>
+		<a>findOneAndUpdate</a>
+		findOneAndDuplicate
+
+	update:
+		<a>replaceOne</a>
+		<a>updateOne</a>
+		<a>updateMany</a>
+			+ --- find
+		<a>findOneAndReplace</a>
+		<a>findOneAndUpdate</a>
 		
-		!!! Ако FormData съдържа много ФАЙЛОВЕ, ще ги запише като игнорира останалите полета
-		!!! Ако FormData съдържа един ФАЙЛ, другите полета 
-			ще ги добави/презапише върху записа на файла (например полето name)
-		!!! Името на ФАЙЛА/ОВЕТЕ се образува от сбора на input[name]+file.name 
-		
-	PATCH = $SET | $PUSH -  partial modifications to a resource
-		url:     /:PATH ? filter={BSON} & multy=1 || push=field.name
-		body:    [FormData]
-		returns: { success: NUM_CHANGED_RECORDS }  <-> onError: { error: STRING, code: NUM }
-		
-		!!! по подразбиране се изпълнява $set, при задаване на $push - FormData се слага в арей с ключ стойността на push
+	insert:
+		<a>insertOne</a>
+		<a>insertMany</a>
+		<a>updateOne</a> {upsert:1}
+		<a>updateMany</a> {upsert:1}
+			+ --- find
+		<a>findOneAndReplace</a> {upsert:1}
+		<a>findOneAndUpdate</a> {upsert:1}
+		findOneAndDuplicate
 	
-	DELETE = REMOVE
-		url:     /:PATH/:id
-		body:    -
-		returns: {success:NUM_DELETED_RECORDS}
-		
-	
-Функции:
+	delete:
+		<a>deleteOne </a>
+		<a>deleteMany</a>
+			+ --- find
+		<a>findOneAndDelete</a>
+</pre>
+
+<h3>ADMIN's  functions </h3>
+<pre>
+* There are two groups - for collections and for database
+
+1.For collection - /admin/:db/:col/
+	stats
+	// options - not implemented
+	// indexes - not implemented
+
+	// rename
+	// drop 
+	// dropIndex 
+	// dropIndexes
+	// createIndex
+	// createIndexes 
+
+2.For database - /admin/:db/
+	listCollections	
+	renameCollection
+	createCollection    // or just create Document
+	dropCollection
+	dropDatabase        // to create DB just create Collection or Document
+	stats
+	command
+	ping
+	indexInformation
+	addUser
+	removeUser
+</pre>
+
+<h3>Super ADMIN's functions</h3>
+<pre>
+* Thees are params of db.admin() - /admin/:func
+ 
+	buildInfo
+	command
 	listDatabases
-	dropDatabase/:database
-	renameDatabase/:from_database-:to_database
-	dropCollection/:database/:collection
-	renameCollection/:database/:from_collection-:to_collection
+	logout
+	ping
+	serverStatus
+	// setProfilingLevel
+	validateCollection
+</pre>
 
+
+<h2>Examples: </h2>
+<pre>
+	POST Files:
+	< form action="/${db}/${collection}/insert">
+		 < input title="Select a file to upload" type="file" [multiple] name="_FILE_DIRECTORY_">
+		[< input title="Override file name if need" name="_id" value="_NEW_FILE_NAME_.ext">]
+		 < input type="submit">
+	< /form>
+</pre>
+
+
+<script>
+	[].forEach.call(document.querySelectorAll("a"), function(anchor){
+		if(!anchor.href){
+			anchor.href = "http://mongodb.github.io/node-mongodb-native/2.2/api/Collection.html#"+anchor.textContent
+		}
+	})
+</script>
 		
-		</pre>
-
 		<hr>
 		<footer style="text-align:center">
 			Links: &nbsp;| &nbsp; 
@@ -112,8 +152,10 @@ URL:
 			<a href="https://www.toptal.com/designers/htmlarrows/">HTML symbols</a>
 			&nbsp; | &nbsp;
 			<a href="https://www.w3schools.com/howto/">JS Tutorial</a>
-			&nbsp; |
+			&nbsp; | &nbsp;
+			<a href="http://mongodb.github.io/node-mongodb-native/2.2/api/">Driver API</a>
 		</footer>
+		<br>
 		<link rel="stylesheet" href="app-menu.css">
 		<script src="app-menu.js"></script>
 	</body>

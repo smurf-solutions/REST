@@ -1,0 +1,96 @@
+<table width="100%">
+	<caption>
+		Documents
+		<div style="float:right">
+			<a class="icon" data-onclick="bodyListDocuments.refresh()">&orarr;</a>
+			<a class="icon" data-onclick="dlgNewDocument.show()">+</a>
+		</div>
+	</caption>
+	<tbody -COMPONENT id="bodyListDocuments"
+		   data-url="/${selectedRoot}/${selectedSub}/find?{}&{}&options={limit:10,skip:0,sort:{%22mimeType%22:-1}}"
+	>
+		<tr><td style="max-width:100%">
+			<div style="cursor:pointer" data-onclick="toggle(this.parentElement)">
+				<b>_id = ${_id}</b> 
+				<span style="float:right">
+					<a class="icon" data-onclick="remove('${_id}',event)">&times;</a>
+					<a class="icon" data-onclick="edit('${_id}',event)">Edit</a>
+				</span>
+			</div>
+			<pre style="display:none;">${stringify($row,false,5)}</pre>
+		</td></tr>
+
+		<tr role="empty"><td>No documents found</td></tr>
+
+		<tr role="style"><td>
+			pre { width:100%;overflow-x:scroll;margin-bottom:0 }
+		</td></tr>
+		
+		<tr role="script"><td>
+			function stringify($row){
+				var cache = []
+				function cyrcularRefRemove(key,value){
+					if (typeof value === 'object' && value !== null)
+						if (cache.indexOf(value) !== -1
+							|| key.indexOf("$") == 0
+						) return;
+						else cache.push(value);
+					return value 
+				}
+				var ret = JSON.stringify($row,cyrcularRefRemove,5)
+				return ret.length < 300 ? ret : ret.substr(0,300)+"\\n\\n\\t<i><b>( ... "+fileSize(ret.length)+" )</b></i>";
+			}
+		
+			function toggle(td){
+				progress.start()
+				var display = td.querySelector("pre").style.display 
+				td.querySelector("pre").style.display = display == "block" ? "none" : "block"
+				progress.stop()
+ 			}
+			function remove(id,event){
+				event.preventDefault();event.stopPropagation()
+				if(confirm('DELETE \\n'+id)){
+					ajax("GET","/"+selectedRoot+"/"+selectedSub+'/deleteOne?{_id:"'+id+'"}',ret=>{
+						if(typeof ret.error !== 'undefined'){
+							alert(ret.error ? ret.error : "ERROR")
+						} else {
+							dispatchEvent(new Event('refresh',{bubbles:true}))
+						}
+					})
+				}
+			}
+			function edit(id,event){
+				event.preventDefault();event.stopPropagation()
+			}
+		</td></tr>
+	</tbody>
+</table>
+
+
+<dialog id="dlgNewDocument" data-template>
+	<div>
+		<big>NEW Document</big>
+		<p><textarea rows="20">{\n  _id:"",\n  \n}</textarea></p>
+		<br>
+		<div style="text-align:right">
+			<button type="button" class="accent" onclick="save()">Save</button>
+			<button type="button" class="transparent" onclick="dlgNewDocument.hide()">Cancel</button>
+		</div>
+	</div>
+	<script>
+		function save(){
+			try {
+				eval("var json=" + dlgNewDocument.element.querySelector("textarea").value)			
+				ajax("POST","../../"+selectedRoot+"/"+selectedSub+"/insert", (ret)=>{
+					if(ret.error){
+						alert(ret.error.errmsg)
+					} else {
+						toast("Success")
+						dlgNewDocument.hide()
+						bodyListDocuments.refresh()
+					}
+				},appendFormData(new FormData,json))
+			} catch(e){ alert(e); console.log(e); return }
+		}
+	</script>
+</dialog>

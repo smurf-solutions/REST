@@ -73,7 +73,7 @@ DatabasesComponent = {
 	
 	remove: function( database ) {
 		if( confirm( database + "\n\nDELETE ?") ) {
-			ajax( "DELETE", "/admin/dropDatabase/"+database, function ( ret ){
+			ajax( "GET", '/admin/'+database+'/dropDatabase', function ( ret ){
 				DatabasesComponent.display()
 			} )
 		}
@@ -87,7 +87,7 @@ CollectionsComponent = {
 	data     : [],
 	
 	getData: function( callback ) {
-		ajax( "GET", CollectionsComponent.dataUrl+"/listCollections", function ( data ) {
+		ajax( "GET", "/admin"+CollectionsComponent.dataUrl+"/listCollections", function ( data ) {
 			CollectionsComponent.data = data
 			callback()
 		}) 
@@ -120,19 +120,19 @@ CollectionsComponent = {
 	display: function() {
 		this.getData( CollectionsComponent.render );
 	},
-	rename: function( name ) {
-		let newName = prompt( "\nRename", name )
+	rename: function( oldName ) {
+		let newName = prompt( "\nRename", oldName )
 		if( newName ) {
-			let url = "/admin/renameCollection/" + RouteService.database + "/" + name + "-" + newName
-			ajax( "POST", url, function ( ret ){
+			let url = "/"+RouteService.database+"/"+oldName+'/rename?newName="'+newName+'"'
+			ajax( "GET", url, function ( ret ){
 				CollectionsComponent.display()
 			} )
 		}
 	},
 	remove: function( collection ) {
-		let url = "/admin/dropCollection/" + RouteService.database + "/" + collection
+		let url = "/"+RouteService.database+"/"+collection+"/drop"
 		if( confirm( "/"+RouteService.database + "/" + collection + "\n\nDELETE ?") ) {
-			ajax( "DELETE", url, function ( ret ){
+			ajax( "GET", url, function ( ret ){
 				CollectionsComponent.display()
 			} )
 		}
@@ -149,18 +149,25 @@ DocumentsComponent = {
 	allPages : 1,
 	allDocs  : 0,
 	perPage  : 10,
-	sort     : {_id:1},
+	sort     : {mimeType:-1}, //{_id:1},
 	
 	getData: function( callback ) {
-		let url = DocumentsComponent.dataUrl + "?find={}&page=" + DocumentsComponent.page 
-				+ "&limit=" + DocumentsComponent.perPage + "&sort=" + JSON.stringify( DocumentsComponent.sort)
+		let url = DocumentsComponent.dataUrl + "/find?{}&{}&options={"
+			+"limit:"+DocumentsComponent.perPage+","
+			+"skip:"+(DocumentsComponent.page-1)*DocumentsComponent.perPage+","
+			+"sort:"+ JSON.stringify( DocumentsComponent.sort)+"}"
+		var counter = 0
 		ajax( "GET", url, function ( ret ) {
-			DocumentsComponent.data = ret.data
-			DocumentsComponent.page = parseInt( ret.page )
-			DocumentsComponent.allPages = parseInt( ret.pages )
-			DocumentsComponent.allDocs = parseInt( ret.founded )
-			callback()
-		}) 
+			DocumentsComponent.data = ret
+			if( counter++ ) callback()
+		})
+		ajax( "GET", DocumentsComponent.dataUrl+"/count", function(number){
+			DocumentsComponent.allDocs = parseInt(number)
+			DocumentsComponent.page = parseInt( DocumentsComponent.page )
+			DocumentsComponent.allPages = Math.ceil( number / DocumentsComponent.perPage )
+			if( counter++ ) callback()
+		})
+
 	},
 	render: function( data ) {
 		let instance = DocumentsComponent.instance
@@ -228,8 +235,8 @@ DocumentComponent = {
 	data  : "",
 	
 	loadData: function( cb ) {
-		let url = "/" + RouteService.database + "/" + RouteService.collection + "/" + RouteService.documentId
-		ajax( "GET", url+"?fields={}", function ( ret ) {
+		let url = "/" + RouteService.database + "/" + RouteService.collection + "/findOne?{_id:\"" + RouteService.documentId+"\"}"
+		ajax( "GET", url, function ( ret ) {
 			DocumentComponent._id = ret._id
 			DocumentComponent.data = ret
 			cb()
@@ -254,21 +261,20 @@ DocumentComponent = {
 	save: function( cb ) {
 		var form = DocumentComponent.instance
 		var url = "/" + form.querySelector( "[name=database]" ).value 
-				+ "/" + form.querySelector( "[name=collection]" ).value 
-				+ ( DocumentComponent._id ? "/" + DocumentComponent._id : "" )
-		var method = DocumentComponent._id ? "POST" : "PUT"
+				+ "/" + form.querySelector( "[name=collection]" ).value
+				+ '/save'
+				//+ ( DocumentComponent._id ? "" : "?insert" )
+				//+ ( DocumentComponent._id ? "/" + DocumentComponent._id : "" )
 		try {
 			eval( 'var jsonData = ' + form.querySelector( "[name=data]" ).value + ';' )
 		} catch( e ) { alert( e ); throw e }
 		
-		ajax( method, url, function ( ret ){
-			cb()
-		}, appendFormData( new FormData, jsonData ) )
+		ajax( "POST", url, cb, appendFormData( new FormData, jsonData ) )
 	},
 	remove: function( cb ) {
-		let url = "/" + RouteService.database + "/" + RouteService.collection + "/" + DocumentComponent._id
-		if( confirm( "/"+RouteService.database + "/" + RouteService.collection + "\n\nDELETE ?") ) {
-			ajax( "DELETE", url, function ( ret ){
+		let url = "/" + RouteService.database + "/" + RouteService.collection + "/remove?{_id:\"" + DocumentComponent._id +"\"}"
+		if( confirm( "/"+RouteService.database + "/" + RouteService.collection+"/"+DocumentComponent._id + "\n\nDELETE ?") ) {
+			ajax( "GET", url, function ( ret ){
 				cb()
 			} )
 		}

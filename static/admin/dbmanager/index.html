@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<base href="/admin/dbmanager/">
+	<title>DB</title>
+	<link rel="shortcut icon" href="../favicon.png" type="image/x-icon" />
+	<link rel="stylesheet" href="../app-menu.css">
+	<link rel="stylesheet" href="../style.css">
+	<script>
+		var selectedRoot, selectedSub
+		function refresh(){
+			breadcrumb.reload()
+			rootsView.reload()
+			subsView.reload()
+			docsView.reload()
+		}
+	</script>
+</head>
+
+<body>
+	<h1 style="padding:20px">DB Manager</h1>
+
+	<!-- Left Menu -->
+	<div style="float:left;width:230px;background:rgba(0,0,0,0.03);height:calc(100% - 57px);overflow:auto">
+		<div -COMPONENT width="100%" style="padding:27px 0px 5px"
+			data-template="/admin/listDatabases?return=/admin/dbmanager/components/leftMenu.html"
+			data-onrootchanged="refresh(event.detail)"
+			data-onsubchanged="refresh(event.detail)"
+		></div>
+	</div>
+
+	<div style="margin-left:230px; height:calc(100% - 56px); overflow:auto; padding:0 20px" >
+		<!-- Buttons -->
+		<div style="float:right">
+			<button class="icon">Md5</button> 
+			<button class="icon">Query</button>
+		</div>
+		
+		<div id="lists" >
+			<!-- Breadcrumb  -->
+			<div -COMPONENT id="breadcrumb" style="margin-bottom:5px">
+				<big><b>/ ${selectedRoot||""} ${selectedSub?" / "+selectedSub:""}</b></big>
+			</div>
+
+			<!-- Databases List -->
+			<div -COMPONENT id="rootsView"
+				 data-if="!window.selectedRoot && !window.selectedSub"
+				 data-template="/admin/listDatabases?return=/admin/dbmanager/components/databases.html"
+			></div>
+			
+			<!-- Collections List -->
+			<div -COMPONENT id="subsView"
+				 data-if="window.selectedRoot && !window.selectedSub" 
+				 data-template="components/collections.html"
+			></div>
+			
+			<!-- Documents List -->
+			<div -COMPONENT id="docsView"
+				 data-if="selectedRoot && selectedSub"
+				 data-template="components/documents.html"
+			></div>
+			
+		</div>
+		
+		<br><br><br>
+		<div style="text-align:left">SMART 2017&copy;</div>
+	</div>
+	<script src="../scope.js"></script>
+	<script src="../functions.js"></script>	
+	<script src="../app-menu.js"></script>
+</body>
+</html>

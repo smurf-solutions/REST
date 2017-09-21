@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Users</title>
+	<link rel="shortcut icon" href="../favicon.png" type="image/x-icon" />
+	<link rel="stylesheet" href="../app-menu.css">
+	<link rel="stylesheet" href="../style.css">
+	<base href="/admin/usermanager/">
+	<style>
+		caption{ text-align:left }
+		td button-icon{ display:inline-block; height:22px;}
+	</style>
+	<script>
+		var db ="" 
+		var id_role
+	</script>
+</head>
+<body>
+	<h1 style="padding:20px">Users Manager</h1>
+	
+		
+	<!-- select DB -->
+	<script>var databases </script>
+	<div style="text-align:center;background:rgba(0,0,0,0.03);padding:10px"
+		 data-template="/admin/listDatabases?return=/admin/usermanager/components/selectDB.html"
+		 data-onchange="changeDbTo(event.target.value);"
+	></div>
+
+	<div style="float:left;width:230px;padding:20px;background:rgba(0,0,0,0.03);height:calc(100% - 94px)">
+		<h1><b style="padding:0 10px;border-radius:50%;background:#aaa;color:#eee">?</b> </h1>
+		<h2>Потребители на База Данните</h2>
+		<p>От тук се можете да управлявате потребителите и техните права за всяка базаданни.</p>
+		<p><b>Ролите</b> са основна групова единица на потребителите. Чрез тях се задават правата за достъп.</p>
+		<p><b>Потребителите</b> се логват с потребителско име и парола и ползват на правата на ролите.</p>
+	</div>
+	
+	<div style="margin-left:230px;padding:0 40px">	
+		<br><br>
+		
+		<!-- Roles LIST -->
+		<div id="roles"
+			 data-template="components/rolesComponent.html"
+			 data-if="db!==''"
+		></div>
+		
+		<br><br>
+		<!-- Users LIST -->
+		<div id="users"
+			 data-template="components/usersComponent.html"
+			 data-if="db!==''" data-else="<b>No DB selected !</b>"
+		></div>
+	</div>
+
+
+<script>
+var changeDbTo = function(db){
+		window.db=db
+		roles.refresh()
+		users.refresh()
+	}
+</script>
+<script src="../app-menu.js"></script>
+<script src="../smart.js"></script>
+<script src="../functions.js"></script>
+
+
+</body>
+</html>

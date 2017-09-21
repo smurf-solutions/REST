@@ -1,0 +1,68 @@
+<script>
+	window.selectedRoot = ""
+	window.selectedSub = ""
+</script>
+
+<!-- ROOT SCOPE -->
+<menu -COMPONENT
+	  id="leftMenu"
+	  data-json='__RESULT_DATA__.databases'
+>	
+	<li role="style">
+		a { display:block;cursor:pointer }
+		li { padding: 2px 10px}
+		li > a { padding:3px 0px; }
+		li.active { font-weight:bold;}
+		li menu { margin:2px; display:none }
+		li.active menu { font-weight:normal; display:block }
+		li.active > menu > li.active { background:rgba(0,0,0,0.05)}
+	</li>
+	
+	<li role="first" style="background:rgba(0,0,0,0.05);margin-bottom:1em">
+		<button data-onclick="reload()" style="float:right;margin-top:-2px" class="icon">&orarr;</button>
+		<a data-onclick="changeToRoot('',this.parentElement)" style="cursor:pointer">
+			<b>	Dbs:</b> <span>${$data.length}</span> 
+				&nbsp;&nbsp;&nbsp;
+			<b>Size:</b> <span>${fileSize(dbSize)}</span>
+		</a>
+	</li>
+	
+	<li>
+		<a data-onclick="changeToRoot('${name}',this.parentElement)">${name} <span style="float:right">${fileSize(sizeOnDisk)}</span> </a>
+		
+		<!-- SUB SCOPE -->
+		<menu -COMPONENT data-url="/admin/${name}/listCollections" data-if="window.selectedRoot=='${name}'">
+				<li><a data-onclick="changeToSub('${name}',this.parentElement)">${name}</a></li>
+				
+				<li role="empty"><i>Empty</i></li>
+				
+				<li role="script">
+					function changeToSub(name,obj){
+						[].forEach.call(obj.parentElement.querySelectorAll(".active"),old=>old.classList.remove("active"))
+						obj.classList.add("active")
+						window.selectedSub = name
+						obj.dispatchEvent(new CustomEvent("subchanged",{bubbles:1,detail:name}))
+					}
+				</li>
+		</menu>
+	</li>
+	
+	<div role="script">
+		var dbSize = $data.reduce((s,r)=>s+r.sizeOnDisk,0)
+		
+		function reload(){
+			leftMenu.reload();
+			changeToRoot('',leftMenu)
+		}
+		
+		function changeToRoot(name,obj){
+			[].forEach.call( obj.parentElement.querySelectorAll(".active"),old=>old.classList.remove("active"))
+			obj.classList.add("active")
+			window.selectedRoot = name
+			window.selectedSub = ""
+			var sub = obj.querySelector("menu"); if(sub) sub.reload()
+			obj.dispatchEvent(new CustomEvent("rootchanged",{bubbles:1,detail:name}))
+		}
+
+	</div>
+</menu>

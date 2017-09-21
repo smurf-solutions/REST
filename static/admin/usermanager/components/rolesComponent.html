@@ -1,0 +1,57 @@
+<table width="100%">
+	<caption>
+		Roles
+		<div style="float:right">
+			<a class="icon" onclick="rolesList.refresh()">&#x27F3;</a>
+			<a class="icon" onclick="dialogCreateRole.show({newRole:true})">+</a>
+		</div>
+	</caption>
+	
+	<thead><tr>
+		<th>Role</th>
+		<th width="1px"></th>
+	</tr></thead>
+	
+	<tbody  id="rolesList" 
+			data-url="/${window.db}/db.roles/find"
+		>
+		<tr>
+			<td>${_id}</td>
+			<td style="white-space:nowrap">
+				<a class="icon" onclick="dialogEditRole.show({_id:'${_id}'})">Edit</a>
+				<a  class="icon" onclick="remove('${_id}')">&times;</a>
+			</td>
+		</tr>
+		<tr role="empty"><td colspan="2">No data </td></tr>
+		
+		<script>
+			function  remove(id_role){
+				if(confirm("DELETE role: \n"+id_role)){
+					ajax("GET","/"+db+'/db.roles/deleteOne?{_id:"'+id_role+'"}', function(ret){
+						if(ret.ok==1) dispatchEvent(new Event('refresh',{bubbles:true}))
+						else{console.error(ret);alert(ret.error && ret.error.errmsg ?ret.error.errmsg:"Error-see log") } 
+					})
+				}
+			}
+		</script>
+	</tbody>
+	
+</table>
+
+
+<dialog id="dialogEditRole" 
+	data-template="components/formEditRole.html"
+	data-if="typeof _id !== 'undefined'"
+	data-onsuccess="rolesList.refresh();dialogEditRole.hide()"
+></dialog>
+
+<dialog id="dialogCreateRole" 
+	data-template="components/formNewRole.html"
+	data-if="typeof newRole !== 'undefined'"
+	data-onsuccess="rolesList.refresh();dialogCreateRole.hide()"
+></dialog>
+
+
+
+<!-- script src="js/rolesController.js"></script -->
+

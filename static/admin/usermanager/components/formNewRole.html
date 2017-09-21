@@ -1,0 +1,80 @@
+<form action="/${window.db}/db.roles/insert" method="AJAX" 
+	  data-onerror="alert(event.detail.error.errmsg)"
+>
+	<big><b>NEW role</b></big>
+	<p><label>Databse:</label> <b>${window.db}</b></p>
+	<p>
+		<label>Role Name:</label>
+		<input name="_id" value="" required autofocus>
+	</p>
+	<div>
+	
+		<style scoped>
+			.collection-list thead th, tbody td:first-child{white-space:nowrap}
+			.collection-list thead input, tbody td:first-child input{width:auto}
+			.collection-list tbody td:first-child{ background:rgba(0,0,0,0.02) }
+			.collection-list label{cursor:pointer}
+		</style>
+
+		<table class="collection-list" width="100%">
+		<caption>Role Rights</caption>
+			<thead><tr>
+				<th><label><input type="checkbox" onclick="select_coll(this,0)">Collection</label></th>
+				<th><label><input type="checkbox" onclick="select_coll(this,1)">Find</label></th>
+				<th><label><input type="checkbox" onclick="select_coll(this,2)">Update</label></th>
+				<th><label><input type="checkbox" onclick="select_coll(this,3)">Inert</label></th>
+				<th><label><input type="checkbox" onclick="select_coll(this,4)">Delete</label></th>
+			</tr></thead>
+			<tbody  id="formNewRole_collectionsList"
+					data-url='/admin/${db}/listCollections'
+			>
+				<tr> <td><label><input type="checkbox" onclick="select_row(this,${$i})"> ${name}</label></td>
+					 <td><input name="read"   value="${name}" type="checkbox"></td>
+					 <td><input name="update" value="${name}" type="checkbox"></td>
+					 <td><input name="insert" value="${name}" type="checkbox"></td>
+					 <td><input name="remove" value="${name}" type="checkbox"></td>
+				</tr>
+				<script>
+					function select_row(box,index){
+						var isChecked = box.hasAttribute("checked") ? false : true
+						document.querySelector("#formNewRole_collectionsList")
+						.querySelectorAll("tr").forEach((tr,i)=>{
+							if(i==index){
+								tr.querySelectorAll("input[type=checkbox]").forEach(checkbox=>{
+									if(isChecked) checkbox.setAttribute("checked",true)
+									else checkbox.removeAttribute("checked")
+								})
+							}
+						})
+					}
+				</script>
+			</tbody>
+		</table>
+	</div>
+	
+	<br>
+	<div style="text-align:right">
+		<button class="accent">Save</button>
+		<button class="transparent" type="button" 
+			onclick="dispatchEvent(new Event('hide',{bubbles:true}))">Cancel</button>
+	</div>
+	
+	<script>
+		function select_coll(box, col){
+			var isChecked = box.hasAttribute("checked") ? false : true
+			if(isChecked) box.setAttribute("checked","checked")
+			else box.removeAttribute("checked")
+			
+			document.querySelector("#formNewRole_collectionsList")
+			.querySelectorAll("tr").forEach(tr=>{
+				tr.querySelectorAll("td").forEach((td,i)=>{
+					var box2 = td.querySelector("input[type=checkbox]")
+					if((col==0 || i==col) && i!==0 && box2){
+						if(isChecked) box2.setAttribute("checked","checked")
+						else box2.removeAttribute("checked")
+					}
+				})
+			})
+		}
+	</script>
+</form>

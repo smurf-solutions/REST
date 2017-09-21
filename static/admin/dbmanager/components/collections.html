@@ -1,0 +1,28 @@
+<table style="width:100%">
+	<caption>Collections 
+		<span style="float:right"><a class="icon">+</a></span>
+	</caption>
+	<thead>
+		<tr><th>Name</th><th>Options</th><th>idIndex</th><th></th></tr>
+	</thead>
+	<tbody -COMPONENT
+		   data-url="/admin/${selectedRoot}/listCollections"
+	>
+		<tr role="empty"><td colspan="4"><i>Empty</i></td></tr>
+		
+		<tr><td>${name}</td>
+			<td>${JSON.stringify(options)}</td>
+			<td>${JSON.stringify(idIndex)}</td>
+			<td><a class="icon" data-onclick="removeSub( '${name}')">&times;</a></td>
+		</tr>
+		
+		<tr role="script"><td>
+			function removeSub(coll){
+				<!-- ajax("GET","/"+selectedDB+"/"+coll+"/remove", function(){ -->
+					<!-- toast("Collection Removed") -->
+					<!-- list.refresh() -->
+				<!-- }) -->
+			}
+		</td></tr>
+	</tbody>
+</table>

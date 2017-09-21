@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Db Manager</title>
+	<title>DB</title>
+	<link rel="shortcut icon" type="image/png" href="favicon.png" />
 	<link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -101,14 +102,14 @@
 		<form>
 			<section>
 				<div style="float:left; width:100px"> 
-					<label>Method:</label> <select name="method" style="height:25px"> <option>GET</option> <option>POST</option> <option>PUT</option> <option>PATCH</option> <option>DELETE</option> </select> 
+					<label>Method:</label> <select name="method" style="height:25px"> <option>GET</option> <option>POST</option> </select> 
 				</div>
 				<div style="float:left; width: calc(100% - 105px); margin-left:5px">
 					<label>Path:</label> <input name="path" style="height:25px;">
 				</div>
 			</section>
 			<br style="clear:both">
-			<section><label>Url params:</label> <input name="params" placeholder="_id?fields={nam:1}"> </section>
+			<section><label>Function:</label> <input name="params" placeholder="func?{params1}&..."> </section>
 			<section><label>Body:</label> <textarea name="body" style="height:100px"></textarea> </section>
 		</form>
 		<footer><button onclick="app.onExecuteTerminalCommand()">Execute</button></footer>

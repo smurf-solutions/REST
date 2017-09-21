@@ -1,0 +1,64 @@
+<script>
+	var databases = __RESULT_DATA__.databases
+</script>
+
+
+
+<table width="500px">
+	<caption>Databases 
+		<span style="float:left">All: <b id="lenthOfDbs">${databases.length}</b></span>
+		<span style="float:right"><a class="icon" onclick="newDatabase()">+</a></span>
+	</caption>
+	<thead>
+		<tr><th>Name</th><th>Size On Disk</th><th>Empty</th></tr>
+	</thead>
+	<tbody __TEMPLATE__
+		data-json='databases'
+	>
+		<tr><td>${name}</td><td style="text-align:right">${fileSize(sizeOnDisk)}</td><td>${empty}</td></tr>
+		
+		<tr role="last"><td></td><th style="text-align:right">${fileSize( getSum())}</th><td></td></tr>
+		
+		<tr role="script"><td>
+			function getSum(){
+				return databases.reduce((sum,a)=>sum+a.sizeOnDisk,0)
+			}
+		</td></tr>
+	</tbody>
+</table>
+
+
+<br>
+<pre>
+<table >
+	<caption>Statistic</caption>
+	<thead><th>Option</th><th>Value</th></thead>
+	<tbody -COMPONENT 
+		data-url="/admin/serverStatus"
+	>
+		<tr><th>Ver</th><td>${JSON.stringify(version)}</td></tr>
+		<tr><th>Host</th><td>${JSON.stringify(host)}</td></tr>
+		<tr><th>Uptime</th><td>${uptime} = ${toReadableTime(uptime)}</td></tr>
+		<tr><th>Local Time</th><td>${JSON.stringify(localTime)}</td></tr>
+		<tr><th>Connections</th><td>${JSON.stringify(connections,null,4)}</td></tr>
+		<tr><th>Extra Info</th><td>${JSON.stringify(extra_info,null,4)}</td></tr>
+		<tr><th>Network</th><td>${JSON.stringify(network,null,4)}</td></tr>
+		<tr><th>Opcounters</th><td>${JSON.stringify(opcounters,null,4)}</td></tr>
+		<tr><th>Memory</th><td>${tcmalloc.tcmalloc.formattedString}</td></tr>
+	
+		<tr role="script"><td>
+			function toReadableTime(x){
+				var seconds = parseInt(x % 60)
+				x /= 60
+				var minutes = parseInt(x % 60)
+				x /= 60
+				var hours = parseInt(x % 24)
+				x /= 24
+				var days = parseInt(x)
+				
+				return days + "d, "+hours+"h, "+minutes+"min, "+seconds+"sec"
+			}
+		</td></tr>
+	</tbody>
+</table>
+</pre>

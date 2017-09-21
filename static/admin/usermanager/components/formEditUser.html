@@ -1,0 +1,17 @@
+<form id="formEditUser" 
+	  action='/${db}/db.users/update?{_id:"${_id}"}&{$set:__FORM_DATA__}' method="AJAX"
+	  data-url='/${db}/db.users/findOne?{_id:"${_id}"}'
+	  data-onerror="alert( event.detail.error.errmsg )" 
+>
+	<big><b>Modify user</b></big>
+	<p> <label>Login Name: <b>${_id}</b></label> </p>
+	<p> <label>Full Name:  <input name="name" value="${name}" autofocus> </label> </p>
+	<p> <label>Email: 	   <input type="email" name="email" value="${email}"></label> </p>
+	<p> <label>Phone: 	   <input type="phone" name="phone" value="${phone}"> </label> </p>
+	<br>
+	<div style="text-align:right">
+		<button class="accent">Save</button> 	
+		<button class="transparent" type="button"
+			onclick="dispatchEvent(new Event('hide',{bubbles:true}))">Cancel</button>
+	</div>
+</form>

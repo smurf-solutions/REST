@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>File Manager</title>
+	<meta charset="utf-8">
+	<title>Files</title>
+	<link rel="shortcut icon" type="image/png" href="favicon.png" />
+	
 	<link rel="stylesheet" href="style.css" />
 	<style>
-		html{ height: 100% }
 		.layout, section { height:calc(100% - 36px) }
 		.hover-reversed { cursor: pointer; padding: 2px 5px }
 		.hover-reversed:hover { color:#fff; background: #333 }
+		.hover-reversed .icon-button{ color:#fff ;float:right; position:relative; top:-1px; padding:0px 5px; border:1px solid transparent}
+		.hover-reversed .icon-button:hover{ border-color:#eee}
+		
 		.active { background: #ddd }
 		.layout { position:fixed; top:48px; right:10px; left:10px; bottom:10px; }
 		footer { position: absolute; bottom:0 }
 	</style>
 </head>
 <body>
-	<h1 style="margin:0">File Manager</h1>
+	<h1 style="margin:0">Files Manager</h1>
 	<div class="layout">
 		
 		<!-- Collections -->
@@ -25,7 +30,9 @@
 			<ul style="padding-left:28px"></ul>
 			<template >
 				<li class="hover-reversed" onclick="app.onCollectionChanged( this.getAttribute('data-value') )">
-					<span class="title"></span>
+					<span class="title"></span> 
+					<span onclick="console.log(this.parentElement.getAttribute('data-path'));window.open(this.parentElement.getAttribute('data-path')+'/find?download','_self')" class="icon-button" title="Download as file">&#x21e9;</span>
+					<!-- <a href="upload()" class="icon-button" target="_null" title="Restore from file">&#x21e7;</a> -->
 				</li>
 			</template>
 		</section>
@@ -33,18 +40,22 @@
 		
 		<!-- TREE -->
 		<section id="tree" style="float:left;width_:200px">
-			<header style="margin:0;">
-				<input id="tree-filter" onkeyup="app.reloadTree()" style="width:120px;float:left;border-width:1px 1px 0 0; height:27px;box-sizing:border-box; margin-left:1px;" type="search" placeholder=".*">
-				<div style="float:left">
+			<header>
+				<input id="tree-filter" onkeyup="app.reloadTree()" style="width:120px;float:left;border-width:1px 1px 0 0; height:27px;box-sizing:border-box; margin-left:1px;" type="search" placeholder="." value="" title="Records Filter">
+				<div style="float:left;margin-top:5px;">
 					<!-- <button-icon  data-title="Filter" style="opacity:0;width:122px; height: 28px;box-sizing:border-box"><span style="transform: rotate(45deg);display:inline-block">&#9906;</span></button-icon> -->
 					<button-icon data-title="Reload" onclick="app.reloadTree()" style="width:25px">&#10227;</button-icon>
 					<button-icon data-title="Upload a file" style="width:25px" onclick="app.onUploadFile()">&#8683</button-icon>
 					<button-icon data-title="Add New File" onclick="app.onSaveNewFile()" style="width:25px;font-weight:bold">+</button-icon>
+					<button-icon data-title="Inport from JSON file" onclick="document.getElementById('selectJSONfile').click()" >&#x21d1;</button-icon>
+					<input type='file' id='selectJSONfile' accept=".json" onchange="app.onInportFromJSON()" hidden>
 				</div>
 			</header>
 			<ul style="border:1px solid #ccc; border-width:1px 0 0 1px; height:calc(100% - 37px); overflow-y:scroll; width:100%; box-sizing:border-box; margin:0;padding:0"></ul>
 			<template class="tree" hidden>
-				<li class="hover-reversed" onclick="app.onTreeSelectionChanged( this.getAttribute('data-path') )"></li>
+				<li class="hover-reversed" onclick="app.onTreeSelectionChanged( this.getAttribute('data-path') )">
+					<span class="title"></span>
+				</li>
 			</template>
 			<form id="upload-file-form" hidden>
 				<input type="file" multiple name="myFileUploader" onchange="app.onUploadFile( this.value )">
@@ -57,10 +68,10 @@
 			<header> 
 				<label style="position:relative;top:5px;font-weight:bold"> No File </label> 
 				<span class="buttons" style="float:right;">  
-					<button name="save" onclick="app.onSaveFile()" hidden>Save</button> 
+					<button name="save" onclick="app.onSaveFile()" hidden class="primary">Save</button> 
 					<button name="rename" hidden onclick="app.onRenameFile()">Rename</button> 
 					<button name="delete" hidden onclick="app.onDeleteFile()">Delete</button>
-					<button name="mime" hidden onclick="app.onChangeMime()" data-title="Change MimeType">Mime</button>
+					<button name="download" hidden onclick="app.onDownload()" data-title="Download as file">Download</button>
 				</span>
 			</header>
 			<div style="min-width:300px; height:calc(100% - 36px); background-color:rgba(255,255,255,0.2);border:1px solid #ccc; margin-top:-1px">
@@ -78,6 +89,7 @@
 	
 	<progress style="width:100%; height:4px; position: fixed; top:0%" hidden></progress>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-language_tools.js"></script>
 	<script src="functions.js"></script>
 	<script src="filemanager.js"></script>
 	
